@@ -1,0 +1,119 @@
+:root {
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  color: #1b1f24;
+  background: linear-gradient(170deg, #f5f9ff 0%, #f8fbf3 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.layout {
+  width: min(1100px, 92vw);
+  margin: 2rem auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1rem;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #dde5ef;
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+.hint {
+  color: #586473;
+}
+
+.form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.grid {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.95rem;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid #c8d4e2;
+}
+
+.checks,
+.score-picks {
+  align-items: center;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+button {
+  background: #1f7a58;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.error {
+  color: #a61d24;
+  font-weight: 600;
+}
+
+.cards {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.card {
+  border: 1px solid #dbe4ef;
+  border-radius: 12px;
+  padding: 0.8rem;
+  background: #fbfdff;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .grid.two {
+    grid-template-columns: 1fr;
+  }
+}
