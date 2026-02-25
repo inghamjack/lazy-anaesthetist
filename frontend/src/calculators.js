@@ -1,28 +1,41 @@
 export const CREATININE_UMOL_PER_MG_DL = 88.4;
 
 export const CATEGORY_META = {
-  elective: { label: "Elective", color: "#1f7a8c" },
-  emergency: { label: "Emergency", color: "#c0392b" },
-  both: { label: "Both", color: "#2d6a4f" },
+  periop_foundation: { label: "Peri-op Foundation", color: "#1f7a8c" },
+  periop_risk: { label: "Peri-op Risk", color: "#2d6a4f" },
+  critical_care: { label: "Critical Care", color: "#7a5c2e" },
+  neuro: { label: "Neurocritical", color: "#6a4c93" },
+  thrombosis: { label: "Thrombosis / PE", color: "#b56576" },
+  trauma: { label: "Trauma", color: "#a44a3f" },
+  gi_pancreatitis: { label: "GI / Pancreatitis", color: "#3c6e71" },
 };
 
 export const SCORE_CATEGORY = {
-  wilson: "elective",
-  stop_bang: "elective",
-  apfel_ponv: "elective",
-  subjective_mets: "both",
-  rcri: "both",
-  sort: "both",
-  gupta_mica: "both",
-  ariscat: "both",
-  caprini_vte: "both",
-  acs_nsqip_manual: "both",
-  news2: "emergency",
-  qsofa: "emergency",
-  sofa_basic: "emergency",
-  nela_manual: "emergency",
-  wfns_sah: "emergency",
-  ich_score: "emergency",
+  wilson: "periop_foundation",
+  stop_bang: "periop_foundation",
+  apfel_ponv: "periop_foundation",
+  subjective_mets: "periop_foundation",
+  dasi: "periop_foundation",
+  rcri: "periop_risk",
+  sort: "periop_risk",
+  gupta_mica: "periop_risk",
+  ariscat: "periop_risk",
+  p_possum: "periop_risk",
+  nela_manual: "periop_risk",
+  acs_nsqip_manual: "periop_risk",
+  news2: "critical_care",
+  qsofa: "critical_care",
+  sofa_basic: "critical_care",
+  wfns_sah: "neuro",
+  ich_score: "neuro",
+  caprini_vte: "thrombosis",
+  pesi: "thrombosis",
+  rts: "trauma",
+  iss: "trauma",
+  triss: "trauma",
+  glasgow_blatchford: "gi_pancreatitis",
+  rockall: "gi_pancreatitis",
+  ranson_criteria: "gi_pancreatitis",
 };
 
 export const SCORE_DEFINITIONS = [
@@ -114,6 +127,12 @@ export const SCORE_DEFINITIONS = [
     required_fields: ["subjective_mets"],
   },
   {
+    key: "dasi",
+    name: "DASI",
+    description: "Duke Activity Status Index converted to estimated peak VO2 and METs.",
+    required_fields: ["dasi_score"],
+  },
+  {
     key: "ariscat",
     name: "ARISCAT",
     description: "Postoperative pulmonary complication risk score.",
@@ -159,10 +178,16 @@ export const SCORE_DEFINITIONS = [
     required_fields: ["nsqip_mortality_percent", "nsqip_serious_complication_percent"],
   },
   {
+    key: "p_possum",
+    name: "P-POSSUM",
+    description: "Portsmouth-POSSUM mortality model using physiological and operative severity subtotal scores.",
+    required_fields: ["p_possum_physiological_score", "p_possum_operative_severity_score"],
+  },
+  {
     key: "wfns_sah",
-    name: "WFNS SAH Grade",
-    description: "World Federation of Neurosurgical Societies grading scale for aneurysmal SAH.",
-    required_fields: ["gcs", "wfns_focal_motor_deficit"],
+    name: "Modified WFNS SAH Grade",
+    description: "Modified WFNS (mWFNS) grading for aneurysmal SAH using GCS alone.",
+    required_fields: ["gcs"],
   },
   {
     key: "ich_score",
@@ -209,6 +234,95 @@ export const SCORE_DEFINITIONS = [
       "caprini_multiple_trauma_lt_1_month",
     ],
   },
+  {
+    key: "pesi",
+    name: "PESI",
+    description: "Pulmonary Embolism Severity Index for 30-day mortality risk stratification in acute PE.",
+    required_fields: [
+      "age",
+      "male",
+      "active_cancer",
+      "congestive_heart_failure",
+      "chronic_lung_disease",
+      "heart_rate",
+      "systolic_bp",
+      "respiratory_rate",
+      "temperature_c",
+      "altered_mental_status",
+      "oxygen_saturation",
+    ],
+  },
+  {
+    key: "rts",
+    name: "RTS",
+    description: "Revised Trauma Score (physiologic severity score using GCS, SBP, and respiratory rate).",
+    required_fields: ["gcs", "systolic_bp", "respiratory_rate"],
+  },
+  {
+    key: "iss",
+    name: "ISS",
+    description: "Injury Severity Score derived from top 3 AIS region scores.",
+    required_fields: [
+      "ais_head_neck",
+      "ais_face",
+      "ais_chest",
+      "ais_abdomen_pelvis",
+      "ais_extremities_pelvic_girdle",
+      "ais_external",
+    ],
+  },
+  {
+    key: "triss",
+    name: "TRISS",
+    description: "Trauma and Injury Severity Score estimating survival using mechanism, RTS, ISS, and age.",
+    required_fields: [
+      "age",
+      "triss_mechanism",
+      "gcs",
+      "systolic_bp",
+      "respiratory_rate",
+      "ais_head_neck",
+      "ais_face",
+      "ais_chest",
+      "ais_abdomen_pelvis",
+      "ais_extremities_pelvic_girdle",
+      "ais_external",
+    ],
+  },
+  {
+    key: "glasgow_blatchford",
+    name: "Glasgow-Blatchford",
+    description: "Pre-endoscopy upper GI bleeding risk score for intervention and escalation planning.",
+    required_fields: [
+      "blood_urea_mmol_l",
+      "hemoglobin_g_dl",
+      "male",
+      "systolic_bp",
+      "heart_rate",
+      "melena",
+      "syncope",
+      "hepatic_disease",
+      "congestive_heart_failure",
+    ],
+  },
+  {
+    key: "rockall",
+    name: "Rockall",
+    description: "Upper GI bleed risk score combining age, shock, comorbidity, diagnosis, and stigmata.",
+    required_fields: [
+      "age",
+      "rockall_shock",
+      "rockall_comorbidity",
+      "rockall_diagnosis",
+      "rockall_stigmata",
+    ],
+  },
+  {
+    key: "ranson_criteria",
+    name: "Ranson Criteria",
+    description: "Acute pancreatitis severity score based on number of admission and 48-hour criteria met.",
+    required_fields: ["ranson_admission_points", "ranson_48h_points"],
+  },
 ];
 
 export const SCORE_MAP = Object.fromEntries(SCORE_DEFINITIONS.map((item) => [item.key, item]));
@@ -225,6 +339,10 @@ export const SCORE_EVIDENCE = {
   sofa_basic: [{ label: "Sepsis-3 / SOFA context", url: "https://pubmed.ncbi.nlm.nih.gov/26903338/" }],
   apfel_ponv: [{ label: "Apfel et al. simplified PONV risk score", url: "https://pubmed.ncbi.nlm.nih.gov/14739823/" }],
   subjective_mets: [{ label: "METS study: subjective vs objective functional capacity", url: "https://pubmed.ncbi.nlm.nih.gov/30070222/" }],
+  dasi: [
+    { label: "DASI derivation", url: "https://pubmed.ncbi.nlm.nih.gov/8249847/" },
+    { label: "METS study functional-capacity context", url: "https://pubmed.ncbi.nlm.nih.gov/30070222/" },
+  ],
   ariscat: [{ label: "ARISCAT derivation", url: "https://pubmed.ncbi.nlm.nih.gov/21045639/" }],
   sort: [
     { label: "SORT derivation", url: "https://pubmed.ncbi.nlm.nih.gov/25388883/" },
@@ -233,9 +351,23 @@ export const SCORE_EVIDENCE = {
   gupta_mica: [{ label: "Gupta MICA derivation", url: "https://pubmed.ncbi.nlm.nih.gov/21730309/" }],
   nela_manual: [{ label: "NELA parsimonious risk calculator", url: "https://data.nela.org.uk/Risk/" }],
   acs_nsqip_manual: [{ label: "ACS NSQIP Surgical Risk Calculator", url: "https://riskcalculator.facs.org/RiskCalculator/" }],
-  wfns_sah: [{ label: "WFNS SAH grading scale report", url: "https://pubmed.ncbi.nlm.nih.gov/3236024/" }],
+  p_possum: [{ label: "P-POSSUM derivation", url: "https://pubmed.ncbi.nlm.nih.gov/9462395/" }],
+  wfns_sah: [
+    { label: "Modified WFNS derivation", url: "https://pubmed.ncbi.nlm.nih.gov/25535068/" },
+    { label: "mWFNS external validation (90-day outcomes)", url: "https://pubmed.ncbi.nlm.nih.gov/37607172/" },
+  ],
   ich_score: [{ label: "Original ICH Score derivation", url: "https://pubmed.ncbi.nlm.nih.gov/11283388/" }],
   caprini_vte: [{ label: "Caprini RAM in perioperative VTE prevention", url: "https://pubmed.ncbi.nlm.nih.gov/33276846/" }],
+  pesi: [
+    { label: "PESI derivation", url: "https://pubmed.ncbi.nlm.nih.gov/16020800/" },
+    { label: "Simplified PESI validation", url: "https://pubmed.ncbi.nlm.nih.gov/20696966/" },
+  ],
+  rts: [{ label: "Revised Trauma Score", url: "https://pubmed.ncbi.nlm.nih.gov/2657085/" }],
+  iss: [{ label: "ISS original description", url: "https://pubmed.ncbi.nlm.nih.gov/4814394/" }],
+  triss: [{ label: "TRISS methodology", url: "https://pubmed.ncbi.nlm.nih.gov/3106646/" }],
+  glasgow_blatchford: [{ label: "Glasgow-Blatchford derivation", url: "https://pubmed.ncbi.nlm.nih.gov/11073021/" }],
+  rockall: [{ label: "Rockall risk score", url: "https://pubmed.ncbi.nlm.nih.gov/8733368/" }],
+  ranson_criteria: [{ label: "Ranson criteria original paper", url: "https://pubmed.ncbi.nlm.nih.gov/4834279/" }],
 };
 
 export const MANUAL_CALCULATOR_LINKS = {
@@ -247,6 +379,7 @@ export const CASE_RISK_SCORE_BUNDLE = [
   "gupta_mica",
   "ariscat",
   "sort",
+  "p_possum",
   "nela_manual",
   "acs_nsqip_manual",
 ];
@@ -705,6 +838,7 @@ export const NUMERIC_INPUTS = {
   bmi: { label: "BMI", min: 0, max: 100, default: 27, step: 0.1, kind: "float" },
   age: { label: "Age", min: 0, max: 130, default: 45, step: 1, kind: "int" },
   subjective_mets: { label: "Subjective METs", min: 0, max: 20, default: 4, step: 0.5, kind: "float" },
+  dasi_score: { label: "DASI score (0-58.2)", min: 0, max: 58.2, default: 34, step: 0.1, kind: "float" },
   neck_circumference_cm: { label: "Neck circumference (cm)", min: 0, max: 100, default: 38, step: 0.1, kind: "float" },
   pao2_fio2: { label: "PaO2/FiO2", min: 0, max: 1000, default: 380, step: 1, kind: "float" },
   platelets: { label: "Platelets", min: 0, max: 1500, default: 220, step: 1, kind: "int" },
@@ -716,6 +850,17 @@ export const NUMERIC_INPUTS = {
   urine_output_ml_day: { label: "Urine output (ml/day)", min: 0, max: 10000, default: 1400, step: 10, kind: "int" },
   surgery_duration_hours: { label: "Surgery duration (hours)", min: 0, max: 24, default: 2, step: 0.1, kind: "float" },
   ich_volume_ml: { label: "ICH volume (mL)", min: 0, max: 300, default: 20, step: 1, kind: "float" },
+  p_possum_physiological_score: { label: "P-POSSUM physiological score", min: 12, max: 96, default: 20, step: 1, kind: "int" },
+  p_possum_operative_severity_score: { label: "P-POSSUM operative severity score", min: 6, max: 48, default: 12, step: 1, kind: "int" },
+  blood_urea_mmol_l: { label: "Urea (mmol/L)", min: 0, max: 80, default: 6, step: 0.1, kind: "float" },
+  ais_head_neck: { label: "AIS head/neck (0-6)", min: 0, max: 6, default: 0, step: 1, kind: "int" },
+  ais_face: { label: "AIS face (0-6)", min: 0, max: 6, default: 0, step: 1, kind: "int" },
+  ais_chest: { label: "AIS chest (0-6)", min: 0, max: 6, default: 0, step: 1, kind: "int" },
+  ais_abdomen_pelvis: { label: "AIS abdomen/pelvis (0-6)", min: 0, max: 6, default: 0, step: 1, kind: "int" },
+  ais_extremities_pelvic_girdle: { label: "AIS extremities/pelvic girdle (0-6)", min: 0, max: 6, default: 0, step: 1, kind: "int" },
+  ais_external: { label: "AIS external (0-6)", min: 0, max: 6, default: 0, step: 1, kind: "int" },
+  ranson_admission_points: { label: "Ranson admission criteria met (0-5)", min: 0, max: 5, default: 0, step: 1, kind: "int" },
+  ranson_48h_points: { label: "Ranson 48-hour criteria met (0-6)", min: 0, max: 6, default: 0, step: 1, kind: "int" },
   caprini_additional_points: { label: "Caprini extra points (manual)", min: 0, max: 20, default: 0, step: 1, kind: "int" },
   nela_30_day_mortality_percent: { label: "NELA 30-day mortality (%)", min: 0, max: 100, default: 5, step: 0.1, kind: "float" },
   nsqip_mortality_percent: { label: "NSQIP mortality risk (%)", min: 0, max: 100, default: 1, step: 0.1, kind: "float" },
@@ -733,6 +878,8 @@ export const BOOLEAN_INPUTS = {
   observed_apnea: { label: "Observed apnea", default: false },
   high_blood_pressure: { label: "High blood pressure", default: false },
   respiratory_infection_last_month: { label: "Respiratory infection in last month", default: false },
+  active_cancer: { label: "Active cancer", default: false },
+  chronic_lung_disease: { label: "Chronic lung disease", default: false },
   emergency_surgery: { label: "Emergency surgery", default: false },
   male: { label: "Male", default: true },
   high_risk_surgery: { label: "High-risk surgery", default: false },
@@ -745,9 +892,11 @@ export const BOOLEAN_INPUTS = {
   insulin_therapy_diabetes: { label: "Insulin therapy diabetes", default: false },
   creatinine_gt_2: { label: "Creatinine > 176.8 umol/L", default: false },
   on_vasopressors: { label: "On vasopressors", default: false },
-  wfns_focal_motor_deficit: { label: "WFNS focal motor deficit", default: false },
   ich_intraventricular_hemorrhage: { label: "ICH intraventricular hemorrhage present", default: false },
   ich_infratentorial_origin: { label: "ICH infratentorial origin", default: false },
+  melena: { label: "Melena", default: false },
+  syncope: { label: "Syncope", default: false },
+  hepatic_disease: { label: "Known hepatic disease", default: false },
   caprini_bmi_gt_25: { label: "Caprini: BMI > 25", default: false },
   caprini_swollen_legs: { label: "Caprini: swollen legs", default: false },
   caprini_varicose_veins: { label: "Caprini: varicose veins", default: false },
@@ -854,6 +1003,49 @@ export const CHOICE_INPUTS = {
       { value: 0, label: "No surgical factor selected" },
       { value: 1, label: "Minor surgery (<45 min)" },
       { value: 2, label: "Major/laparoscopic >45 min or arthroscopic surgery" },
+    ],
+  },
+  triss_mechanism: {
+    label: "TRISS injury mechanism",
+    default: "blunt",
+    options: [
+      { value: "blunt", label: "Blunt trauma" },
+      { value: "penetrating", label: "Penetrating trauma" },
+    ],
+  },
+  rockall_shock: {
+    label: "Rockall shock status",
+    default: "none",
+    options: [
+      { value: "none", label: "No shock (SBP >=100 and pulse <100)" },
+      { value: "tachycardia", label: "Tachycardia (SBP >=100 and pulse >=100)" },
+      { value: "hypotension", label: "Hypotension (SBP <100)" },
+    ],
+  },
+  rockall_comorbidity: {
+    label: "Rockall comorbidity",
+    default: "none",
+    options: [
+      { value: "none", label: "No major comorbidity" },
+      { value: "cardiac_or_other_major", label: "Cardiac failure / IHD / major comorbidity" },
+      { value: "renal_liver_metastatic", label: "Renal failure / liver failure / metastatic cancer" },
+    ],
+  },
+  rockall_diagnosis: {
+    label: "Rockall diagnosis",
+    default: "mallory_weiss_or_none",
+    options: [
+      { value: "mallory_weiss_or_none", label: "Mallory-Weiss tear or no lesion" },
+      { value: "other_non_malignant", label: "Other non-malignant diagnosis" },
+      { value: "upper_gi_malignancy", label: "Upper GI malignancy" },
+    ],
+  },
+  rockall_stigmata: {
+    label: "Rockall stigmata of recent hemorrhage",
+    default: "none_or_dark_spot",
+    options: [
+      { value: "none_or_dark_spot", label: "None or dark spot only" },
+      { value: "blood_or_visible_vessel", label: "Blood in upper GI tract, adherent clot, visible/active vessel" },
     ],
   },
 };
@@ -1386,6 +1578,34 @@ function computeSubjectiveMets(i) {
   };
 }
 
+function computeDasi(i) {
+  const score = i.dasi_score;
+  const vo2Peak = 0.43 * score + 9.6;
+  const mets = vo2Peak / 3.5;
+
+  let interpretation = "";
+  let riskEstimate = "";
+  if (mets < 4) {
+    interpretation = "poor functional capacity";
+    riskEstimate = `Estimated peak VO2 is ${vo2Peak.toFixed(1)} mL/kg/min (${mets.toFixed(1)} METs), suggesting limited physiological reserve.`;
+  } else if (mets < 7) {
+    interpretation = "moderate functional capacity";
+    riskEstimate = `Estimated peak VO2 is ${vo2Peak.toFixed(1)} mL/kg/min (${mets.toFixed(1)} METs), suggesting intermediate reserve.`;
+  } else {
+    interpretation = "good functional capacity";
+    riskEstimate = `Estimated peak VO2 is ${vo2Peak.toFixed(1)} mL/kg/min (${mets.toFixed(1)} METs), suggesting better reserve.`;
+  }
+
+  return {
+    score: "dasi",
+    value: Number(score.toFixed(1)),
+    interpretation: `${interpretation} (estimated ${mets.toFixed(1)} METs)`,
+    risk_estimate: riskEstimate,
+    clinical_note:
+      "DASI supports perioperative functional stratification; use alongside surgical risk and cardiopulmonary comorbidity assessment.",
+  };
+}
+
 function computeAriscat(i) {
   let points = 0;
   if (i.age > 80) points += 16;
@@ -1504,36 +1724,66 @@ function computeNsqipManual(i) {
   };
 }
 
+function computePPossum(i) {
+  const physiological = i.p_possum_physiological_score;
+  const operative = i.p_possum_operative_severity_score;
+  const logit = -9.065 + 0.1692 * physiological + 0.155 * operative;
+  const mortality = 100 / (1 + Math.exp(-logit));
+
+  let interpretation = "";
+  if (mortality < 5) interpretation = "lower predicted operative mortality";
+  else if (mortality < 10) interpretation = "intermediate predicted operative mortality";
+  else if (mortality < 20) interpretation = "high predicted operative mortality";
+  else interpretation = "very high predicted operative mortality";
+
+  return {
+    score: "p_possum",
+    value: Number(mortality.toFixed(2)),
+    interpretation,
+    risk_estimate: `Estimated mortality is ${mortality.toFixed(2)}% using entered P-POSSUM physiological (${physiological}) and operative (${operative}) subtotals.`,
+    clinical_note:
+      "P-POSSUM depends on correct component scoring and may need local calibration; verify thresholds against local governance use.",
+  };
+}
+
 function computeWfnsSah(i) {
   const gcs = i.gcs;
-  const deficit = i.wfns_focal_motor_deficit;
   let grade = 5;
 
-  if (gcs === 15 && !deficit) grade = 1;
-  else if (gcs >= 13 && gcs <= 14 && !deficit) grade = 2;
-  else if (gcs >= 13 && gcs <= 14 && deficit) grade = 3;
+  if (gcs === 15) grade = 1;
+  else if (gcs === 14) grade = 2;
+  else if (gcs === 13) grade = 3;
   else if (gcs >= 7 && gcs <= 12) grade = 4;
   else grade = 5;
 
+  // Derived from Nguyen et al. 2023 external validation (mRS 4-6 at day 90):
+  // grade I: 18/204, II: 5/38, III: 9/24, IV: 58/99, V: 43/50.
+  const poorOutcome90dPctByGrade = {
+    1: 8.8,
+    2: 13.2,
+    3: 37.5,
+    4: 58.6,
+    5: 86.0,
+  };
+
   let interpretation = "";
-  let riskEstimate = "";
+  const poorOutcomePct = poorOutcome90dPctByGrade[grade];
+  let riskEstimate = `Estimated 90-day major morbidity/mortality (mRS 4-6, includes death): ${poorOutcomePct.toFixed(1)}% in one external validation cohort.`;
   if (grade <= 2) {
     interpretation = "lower neurologic severity at presentation";
-    riskEstimate = "WFNS grade I-II is generally associated with more favorable outcome than higher grades.";
   } else if (grade === 3) {
     interpretation = "intermediate neurologic severity";
-    riskEstimate = "WFNS grade III indicates intermediate risk and requires close monitoring for deterioration.";
   } else {
     interpretation = "high neurologic severity at presentation";
-    riskEstimate = "WFNS grade IV-V is associated with substantially worse neurologic outcomes.";
   }
 
   return {
     score: "wfns_sah",
     value: grade,
-    interpretation: `WFNS grade ${grade}: ${interpretation}`,
+    interpretation: `Modified WFNS grade ${grade}: ${interpretation}`,
     risk_estimate: riskEstimate,
-    clinical_note: "Use with imaging and aneurysm management planning; serial neurologic exams remain essential.",
+    clinical_note:
+      "Use with imaging and aneurysm management planning; percentages are cohort-derived and should support, not replace, clinical judgment.",
   };
 }
 
@@ -1635,6 +1885,302 @@ function computeCapriniVte(i) {
   };
 }
 
+function computePesi(i) {
+  let points = i.age;
+  points += i.male ? 10 : 0;
+  points += i.active_cancer ? 30 : 0;
+  points += i.congestive_heart_failure ? 10 : 0;
+  points += i.chronic_lung_disease ? 10 : 0;
+  points += i.heart_rate >= 110 ? 20 : 0;
+  points += i.systolic_bp < 100 ? 30 : 0;
+  points += i.respiratory_rate >= 30 ? 20 : 0;
+  points += i.temperature_c < 36 ? 20 : 0;
+  points += i.altered_mental_status ? 60 : 0;
+  points += i.oxygen_saturation < 90 ? 20 : 0;
+
+  let riskClass = 5;
+  if (points <= 65) riskClass = 1;
+  else if (points <= 85) riskClass = 2;
+  else if (points <= 105) riskClass = 3;
+  else if (points <= 125) riskClass = 4;
+
+  const classLabels = {
+    1: "Class I (very low risk)",
+    2: "Class II (low risk)",
+    3: "Class III (intermediate risk)",
+    4: "Class IV (high risk)",
+    5: "Class V (very high risk)",
+  };
+  const mortalityRange = {
+    1: "Estimated 30-day mortality is roughly 0.0-1.6%.",
+    2: "Estimated 30-day mortality is roughly 1.7-3.5%.",
+    3: "Estimated 30-day mortality is roughly 3.2-7.1%.",
+    4: "Estimated 30-day mortality is roughly 4.0-11.4%.",
+    5: "Estimated 30-day mortality is roughly 10.0-24.5%.",
+  };
+
+  return {
+    score: "pesi",
+    value: points,
+    interpretation: classLabels[riskClass],
+    risk_estimate: mortalityRange[riskClass],
+    clinical_note: "Use PESI with right-ventricular, biomarker, and bleeding-risk assessment to guide PE disposition and treatment intensity.",
+  };
+}
+
+function rtsGcsCode(gcs) {
+  if (gcs >= 13) return 4;
+  if (gcs >= 9) return 3;
+  if (gcs >= 6) return 2;
+  if (gcs >= 4) return 1;
+  return 0;
+}
+
+function rtsSbpCode(sbp) {
+  if (sbp > 89) return 4;
+  if (sbp >= 76) return 3;
+  if (sbp >= 50) return 2;
+  if (sbp >= 1) return 1;
+  return 0;
+}
+
+function rtsRespCode(respiratoryRate) {
+  if (respiratoryRate >= 10 && respiratoryRate <= 29) return 4;
+  if (respiratoryRate > 29) return 3;
+  if (respiratoryRate >= 6) return 2;
+  if (respiratoryRate >= 1) return 1;
+  return 0;
+}
+
+function calculateRts(i) {
+  const gcsCode = rtsGcsCode(i.gcs);
+  const sbpCode = rtsSbpCode(i.systolic_bp);
+  const rrCode = rtsRespCode(i.respiratory_rate);
+  const triage = gcsCode + sbpCode + rrCode;
+  const weighted = 0.9368 * gcsCode + 0.7326 * sbpCode + 0.2908 * rrCode;
+  return { gcsCode, sbpCode, rrCode, triage, weighted };
+}
+
+function computeRts(i) {
+  const { triage, weighted } = calculateRts(i);
+  let interpretation = "";
+  if (weighted >= 7) interpretation = "lower physiologic trauma severity";
+  else if (weighted >= 5) interpretation = "moderate physiologic trauma severity";
+  else interpretation = "high physiologic trauma severity";
+
+  return {
+    score: "rts",
+    value: Number(weighted.toFixed(2)),
+    interpretation: `${interpretation} (triage RTS ${triage}/12)`,
+    risk_estimate: "Lower RTS is associated with higher mortality risk in trauma cohorts.",
+    clinical_note: "RTS is useful for early triage and works best when interpreted with anatomical injury severity.",
+  };
+}
+
+function buildAisValues(i) {
+  return [
+    i.ais_head_neck,
+    i.ais_face,
+    i.ais_chest,
+    i.ais_abdomen_pelvis,
+    i.ais_extremities_pelvic_girdle,
+    i.ais_external,
+  ].map((v) => Math.max(0, Math.min(6, Number.parseInt(v, 10) || 0)));
+}
+
+function calculateIss(i) {
+  const aisValues = buildAisValues(i);
+  if (aisValues.some((v) => v === 6)) {
+    return 75;
+  }
+  const topThree = [...aisValues].sort((a, b) => b - a).slice(0, 3);
+  return topThree.reduce((sum, v) => sum + v * v, 0);
+}
+
+function computeIss(i) {
+  const iss = calculateIss(i);
+  let interpretation = "";
+  if (iss >= 25) interpretation = "critical anatomical trauma severity";
+  else if (iss >= 16) interpretation = "major trauma range";
+  else if (iss >= 9) interpretation = "moderate trauma range";
+  else interpretation = "lower anatomical trauma burden";
+
+  return {
+    score: "iss",
+    value: iss,
+    interpretation,
+    risk_estimate: iss >= 16 ? "ISS >=16 is commonly treated as major trauma threshold." : "ISS <16 is below common major-trauma thresholds.",
+    clinical_note: "ISS reflects anatomical injury burden and complements physiologic scores (e.g. RTS) in trauma prognostication.",
+  };
+}
+
+function computeTriss(i) {
+  const iss = calculateIss(i);
+  const { weighted: rts } = calculateRts(i);
+  const ageIndex = i.age >= 55 ? 1 : 0;
+  const blunt = i.triss_mechanism === "blunt";
+  const b = blunt
+    ? -0.4499 + 0.8085 * rts - 0.0835 * iss - 1.743 * ageIndex
+    : -2.5355 + 0.9934 * rts - 0.0651 * iss - 1.136 * ageIndex;
+  const survival = 100 / (1 + Math.exp(-b));
+  const mortality = 100 - survival;
+
+  let interpretation = "";
+  if (survival >= 95) interpretation = "very high predicted survival";
+  else if (survival >= 80) interpretation = "high predicted survival";
+  else if (survival >= 50) interpretation = "intermediate predicted survival";
+  else interpretation = "low predicted survival";
+
+  return {
+    score: "triss",
+    value: Number(survival.toFixed(2)),
+    interpretation,
+    risk_estimate: `Predicted survival ${survival.toFixed(2)}% (predicted mortality ${mortality.toFixed(2)}%).`,
+    clinical_note:
+      "TRISS uses legacy MTOS coefficients and is most useful for structured communication/benchmarking rather than sole decision-making.",
+  };
+}
+
+function computeGlasgowBlatchford(i) {
+  let points = 0;
+
+  if (i.blood_urea_mmol_l >= 25) points += 6;
+  else if (i.blood_urea_mmol_l >= 10) points += 4;
+  else if (i.blood_urea_mmol_l >= 8) points += 3;
+  else if (i.blood_urea_mmol_l >= 6.5) points += 2;
+
+  if (i.male) {
+    if (i.hemoglobin_g_dl < 10) points += 6;
+    else if (i.hemoglobin_g_dl < 12) points += 3;
+    else if (i.hemoglobin_g_dl < 13) points += 1;
+  } else {
+    if (i.hemoglobin_g_dl < 10) points += 6;
+    else if (i.hemoglobin_g_dl < 12) points += 1;
+  }
+
+  if (i.systolic_bp < 90) points += 3;
+  else if (i.systolic_bp < 100) points += 2;
+  else if (i.systolic_bp < 110) points += 1;
+
+  points += i.heart_rate >= 100 ? 1 : 0;
+  points += i.melena ? 1 : 0;
+  points += i.syncope ? 2 : 0;
+  points += i.hepatic_disease ? 2 : 0;
+  points += i.congestive_heart_failure ? 2 : 0;
+
+  let interpretation = "";
+  let riskEstimate = "";
+  if (points === 0) {
+    interpretation = "very low UGIB intervention risk";
+    riskEstimate = "GBS 0 identifies a very-low-risk group often suitable for outpatient management pathways.";
+  } else if (points <= 5) {
+    interpretation = "increased UGIB risk";
+    riskEstimate = "Score above 0 suggests need for in-hospital assessment and endoscopy planning.";
+  } else if (points <= 12) {
+    interpretation = "high UGIB risk";
+    riskEstimate = "Higher GBS values are associated with higher probability of transfusion/endoscopic intervention.";
+  } else {
+    interpretation = "very high UGIB risk";
+    riskEstimate = "Very high GBS values indicate substantial risk of intervention and should prompt urgent specialist management.";
+  }
+
+  return {
+    score: "glasgow_blatchford",
+    value: points,
+    interpretation,
+    risk_estimate: riskEstimate,
+    clinical_note: "GBS is a pre-endoscopy score and should be paired with hemodynamic and endoscopic findings once available.",
+  };
+}
+
+function computeRockall(i) {
+  let agePoints = 0;
+  if (i.age >= 80) agePoints = 2;
+  else if (i.age >= 60) agePoints = 1;
+
+  const shockPointsMap = {
+    none: 0,
+    tachycardia: 1,
+    hypotension: 2,
+  };
+  const comorbidityPointsMap = {
+    none: 0,
+    cardiac_or_other_major: 2,
+    renal_liver_metastatic: 3,
+  };
+  const diagnosisPointsMap = {
+    mallory_weiss_or_none: 0,
+    other_non_malignant: 1,
+    upper_gi_malignancy: 2,
+  };
+  const stigmataPointsMap = {
+    none_or_dark_spot: 0,
+    blood_or_visible_vessel: 2,
+  };
+
+  const points =
+    agePoints +
+    (shockPointsMap[i.rockall_shock] ?? 0) +
+    (comorbidityPointsMap[i.rockall_comorbidity] ?? 0) +
+    (diagnosisPointsMap[i.rockall_diagnosis] ?? 0) +
+    (stigmataPointsMap[i.rockall_stigmata] ?? 0);
+
+  let interpretation = "";
+  let riskEstimate = "";
+  if (points <= 2) {
+    interpretation = "low rebleeding/mortality risk";
+    riskEstimate = "Low Rockall totals are associated with relatively low in-hospital mortality and rebleeding risk.";
+  } else if (points <= 4) {
+    interpretation = "intermediate rebleeding/mortality risk";
+    riskEstimate = "Intermediate Rockall totals suggest meaningful risk and usually warrant inpatient management.";
+  } else if (points <= 6) {
+    interpretation = "high rebleeding/mortality risk";
+    riskEstimate = "High Rockall totals are associated with substantial rebleeding and in-hospital mortality risk.";
+  } else {
+    interpretation = "very high rebleeding/mortality risk";
+    riskEstimate = "Very high Rockall totals indicate markedly increased in-hospital risk and need for close specialist-led care.";
+  }
+
+  return {
+    score: "rockall",
+    value: points,
+    interpretation,
+    risk_estimate: riskEstimate,
+    clinical_note: "This implementation reflects the full Rockall score (including endoscopic findings).",
+  };
+}
+
+function computeRansonCriteria(i) {
+  const admission = Math.max(0, Math.min(5, Number.parseInt(i.ranson_admission_points, 10) || 0));
+  const at48h = Math.max(0, Math.min(6, Number.parseInt(i.ranson_48h_points, 10) || 0));
+  const points = admission + at48h;
+
+  let interpretation = "";
+  let riskEstimate = "";
+  if (points <= 2) {
+    interpretation = "mild predicted pancreatitis severity";
+    riskEstimate = "Classic cohorts suggest mortality is usually low (roughly 1-5%).";
+  } else if (points <= 4) {
+    interpretation = "moderate-severe predicted pancreatitis";
+    riskEstimate = "Classic cohorts suggest mortality around 15-20%.";
+  } else if (points <= 6) {
+    interpretation = "severe predicted pancreatitis";
+    riskEstimate = "Classic cohorts suggest mortality around 40%.";
+  } else {
+    interpretation = "critical predicted pancreatitis severity";
+    riskEstimate = "Classic cohorts report very high mortality at this range.";
+  }
+
+  return {
+    score: "ranson_criteria",
+    value: points,
+    interpretation,
+    risk_estimate: riskEstimate,
+    clinical_note:
+      "Enter number of criteria met at admission and by 48 hours; this keeps workflow simple while preserving Ranson staging.",
+  };
+}
+
 const COMPUTERS = {
   wilson: computeWilson,
   stop_bang: computeStopBang,
@@ -1644,14 +2190,23 @@ const COMPUTERS = {
   sofa_basic: computeSofaBasic,
   apfel_ponv: computeApfel,
   subjective_mets: computeSubjectiveMets,
+  dasi: computeDasi,
   ariscat: computeAriscat,
   sort: computeSort,
   gupta_mica: computeGuptaMica,
   nela_manual: computeNelaManual,
   acs_nsqip_manual: computeNsqipManual,
+  p_possum: computePPossum,
   wfns_sah: computeWfnsSah,
   ich_score: computeIchScore,
   caprini_vte: computeCapriniVte,
+  pesi: computePesi,
+  rts: computeRts,
+  iss: computeIss,
+  triss: computeTriss,
+  glasgow_blatchford: computeGlasgowBlatchford,
+  rockall: computeRockall,
+  ranson_criteria: computeRansonCriteria,
 };
 
 export function computeScores(selectedScores, inputs) {

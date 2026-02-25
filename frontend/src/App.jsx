@@ -97,18 +97,21 @@ function App() {
   );
 
   const caseBasics = useMemo(() => computeCaseBasics(demographics), [demographics]);
+  const categoryOrder = useMemo(() => Object.keys(CATEGORY_META), []);
 
   const groupedScores = useMemo(() => {
-    const grouped = { elective: [], emergency: [], both: [] };
+    const grouped = {};
+    for (const category of categoryOrder) grouped[category] = [];
     for (const score of SCORE_DEFINITIONS) {
-      const category = SCORE_CATEGORY[score.key] ?? "both";
+      const category = SCORE_CATEGORY[score.key] ?? categoryOrder[0];
+      if (!grouped[category]) grouped[category] = [];
       grouped[category].push(score);
     }
     for (const category of Object.keys(grouped)) {
       grouped[category].sort((a, b) => a.name.localeCompare(b.name));
     }
     return grouped;
-  }, []);
+  }, [categoryOrder]);
 
   const inputValues = useMemo(() => {
     const parsed = {};
@@ -773,13 +776,14 @@ function App() {
           <button type="button" onClick={onClearSelection} className="ghost">Clear score selection</button>
         </div>
 
-        {(["elective", "emergency", "both"]).map((category) => {
+        {(categoryOrder).map((category) => {
           const list = groupedScores[category];
           if (!list.length) return null;
+          const meta = CATEGORY_META[category] ?? { label: category, color: "#666666" };
           return (
             <div key={category} className="score-group">
-              <span className="pill" style={{ background: CATEGORY_META[category].color }}>
-                {CATEGORY_META[category].label} Scores
+              <span className="pill" style={{ background: meta.color }}>
+                {meta.label} Scores
               </span>
               <div className="grid two checks">
                 {list.map((score) => (
