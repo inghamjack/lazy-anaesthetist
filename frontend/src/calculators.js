@@ -575,10 +575,8 @@ export const DIABETES_MEDICATION_RULES = [
 ];
 
 export const LOCAL_ANAESTHETIC_GUIDANCE_LINKS = {
-  lidocaine: "https://www.medicines.org.uk/emc/product/15150/smpc",
   bupivacaine: "https://www.medicines.org.uk/emc/product/11611/smpc",
   levobupivacaine: "https://www.medicines.org.uk/emc/product/13642/smpc",
-  prilocaine: "https://www.medicines.org.uk/emc/product/870/smpc",
   supporting_weight_table:
     "https://rightdecisions.scot.nhs.uk/tam-treatments-and-medicines-nhs-highland/adult-therapeutic-guidelines/anaesthesia/local-anaesthesia/",
 };
@@ -594,11 +592,11 @@ export const LOCAL_ANAESTHETIC_LIMITS = [
   {
     key: "lidocaine_plain",
     label: "Lidocaine (plain)",
-    mgPerKg: 4.5,
+    mgPerKg: 3,
     maxMg: 300,
     commonConcentrationMgMl: 10,
     concentrationLabel: "1% (10 mg/mL)",
-    note: "From SmPC: 4.5 mg/kg up to 300 mg without vasoconstrictor.",
+    note: "Local institutional rule: 3 mg/kg up to 300 mg without vasoconstrictor.",
   },
   {
     key: "lidocaine_adrenaline",

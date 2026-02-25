@@ -355,7 +355,7 @@ function App() {
   return (
     <main className="layout">
       <section className="panel">
-        <h1>The Lazy Anaethetist - A Compilation of Scores in Elective & Emergency Anaesthesia</h1>
+        <h1>The Lazy Anaesthetist</h1>
 
         <h2>Case Basics</h2>
         <p className="hint">Enter demographics once to generate core case metrics and auto-fill age/sex/BMI for relevant scores.</p>
@@ -458,325 +458,300 @@ function App() {
           </article>
         </div>
 
-        <h2>Regional Anaesthesia Suggestions</h2>
-        <p className="hint">Simple site-based options only. No dosing or protocol logic.</p>
-        <div className="grid two">
-          <label>
-            Search surgery site
-            <input
-              type="text"
-              value={regionalSearch}
-              onChange={(e) => setRegionalSearch(e.target.value)}
-              placeholder="e.g. shoulder, chest, lower abdomen, spine"
-            />
-          </label>
-          <label>
-            Surgery site
-            <select
-              value={selectedRegionalSite}
-              onChange={(e) => setSelectedRegionalSite(e.target.value)}
-            >
-              <option value="">Select a site...</option>
-              {filteredRegionalSites.map((item) => (
-                <option key={item.key} value={item.key}>{item.label}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-        {regionalSuggestion ? (
-          <article className="metric-card">
-            <h3>{regionalSuggestion.label}</h3>
-            <p><strong>Primary options:</strong> {regionalSuggestion.primary.join("; ")}.</p>
-            <p><strong>Alternatives:</strong> {regionalSuggestion.alternatives.join("; ")}.</p>
-            <p className="hint"><strong>Caution:</strong> {regionalSuggestion.caution}</p>
-          </article>
-        ) : null}
-
-        <h2>Anticoagulant & Regional Safety</h2>
-        <p className="hint">
-          UK Association guidance-based timing prompt (2013 table values; guidance page states it is under review).
-          Confirm against current local policy before proceeding.
-        </p>
-        <div className="actions two">
-          <a className="button-link" href={ANTICOAG_GUIDANCE_LINKS.summary_page} target="_blank" rel="noreferrer">
-            Open UK guidance page
-          </a>
-          <a className="button-link" href={ANTICOAG_GUIDANCE_LINKS.pdf_mirror} target="_blank" rel="noreferrer">
-            Open UK guidance PDF
-          </a>
-        </div>
-        <div className="grid three">
-          <label>
-            Procedure type
-            <select
-              value={anticoag.procedureRisk}
-              onChange={(e) => onAnticoagChange("procedureRisk", e.target.value)}
-            >
-              {ANTICOAG_PROCEDURE_OPTIONS.map((item) => (
-                <option key={item.value} value={item.value}>{item.label}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Anticoagulant / antiplatelet
-            <select
-              value={anticoag.entryId}
-              onChange={(e) => onAnticoagChange("entryId", e.target.value)}
-            >
-              {Object.entries(anticoagGroups).map(([group, items]) => (
-                <optgroup key={group} label={group}>
-                  {items.map((item) => (
-                    <option key={item.id} value={item.id}>{item.label}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </label>
-          <label>
-            Hours since last dose
-            <input
-              type="number"
-              min={0}
-              max={400}
-              step={0.1}
-              value={anticoag.hoursSinceLastDose}
-              onChange={(e) => onAnticoagChange("hoursSinceLastDose", e.target.value, "number")}
-            />
-          </label>
-        </div>
-        <div className="grid three checks">
-          {selectedAnticoagEntry?.requiresInrLe ? (
+        <details className="details">
+          <summary>Regional Anaesthesia Tools</summary>
+          <h3>Regional Anaesthesia Suggestions</h3>
+          <p className="hint">Simple site-based options only. No dosing or protocol logic.</p>
+          <div className="grid two">
             <label>
-              INR
+              Search surgery site
               <input
-                type="number"
-                min={0.8}
-                max={10}
-                step={0.1}
-                value={anticoag.inr}
-                onChange={(e) => onAnticoagChange("inr", e.target.value, "number")}
+                type="text"
+                value={regionalSearch}
+                onChange={(e) => setRegionalSearch(e.target.value)}
+                placeholder="e.g. shoulder, chest, lower abdomen, spine"
               />
             </label>
+            <label>
+              Surgery site
+              <select
+                value={selectedRegionalSite}
+                onChange={(e) => setSelectedRegionalSite(e.target.value)}
+              >
+                <option value="">Select a site...</option>
+                {filteredRegionalSites.map((item) => (
+                  <option key={item.key} value={item.key}>{item.label}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+          {regionalSuggestion ? (
+            <article className="metric-card">
+              <h3>{regionalSuggestion.label}</h3>
+              <p><strong>Primary options:</strong> {regionalSuggestion.primary.join("; ")}.</p>
+              <p><strong>Alternatives:</strong> {regionalSuggestion.alternatives.join("; ")}.</p>
+              <p className="hint"><strong>Caution:</strong> {regionalSuggestion.caution}</p>
+            </article>
           ) : null}
-          {selectedAnticoagEntry?.requiresNormalAptt ? (
+
+          <h3>Anticoagulant & Regional Safety</h3>
+          <p className="hint">
+            UK Association guidance-based timing prompt (2013 table values; guidance page states it is under review).
+            Confirm against current local policy before proceeding.
+          </p>
+          <div className="actions two">
+            <a className="button-link" href={ANTICOAG_GUIDANCE_LINKS.summary_page} target="_blank" rel="noreferrer">
+              Open UK guidance page
+            </a>
+            <a className="button-link" href={ANTICOAG_GUIDANCE_LINKS.pdf_mirror} target="_blank" rel="noreferrer">
+              Open UK guidance PDF
+            </a>
+          </div>
+          <div className="grid three">
+            <label>
+              Procedure type
+              <select
+                value={anticoag.procedureRisk}
+                onChange={(e) => onAnticoagChange("procedureRisk", e.target.value)}
+              >
+                {ANTICOAG_PROCEDURE_OPTIONS.map((item) => (
+                  <option key={item.value} value={item.value}>{item.label}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Anticoagulant / antiplatelet
+              <select
+                value={anticoag.entryId}
+                onChange={(e) => onAnticoagChange("entryId", e.target.value)}
+              >
+                {Object.entries(anticoagGroups).map(([group, items]) => (
+                  <optgroup key={group} label={group}>
+                    {items.map((item) => (
+                      <option key={item.id} value={item.id}>{item.label}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </label>
+            <label>
+              Hours since last dose
+              <input
+                type="number"
+                min={0}
+                max={400}
+                step={0.1}
+                value={anticoag.hoursSinceLastDose}
+                onChange={(e) => onAnticoagChange("hoursSinceLastDose", e.target.value, "number")}
+              />
+            </label>
+          </div>
+          <div className="grid three checks">
+            {selectedAnticoagEntry?.requiresInrLe ? (
+              <label>
+                INR
+                <input
+                  type="number"
+                  min={0.8}
+                  max={10}
+                  step={0.1}
+                  value={anticoag.inr}
+                  onChange={(e) => onAnticoagChange("inr", e.target.value, "number")}
+                />
+              </label>
+            ) : null}
+            {selectedAnticoagEntry?.requiresNormalAptt ? (
+              <label className="checkbox">
+                <input
+                  type="checkbox"
+                  checked={Boolean(anticoag.apttNormal)}
+                  onChange={(e) => onAnticoagChange("apttNormal", e.target.checked, "checkbox")}
+                />
+                <span>APTT ratio currently normal</span>
+              </label>
+            ) : null}
             <label className="checkbox">
               <input
                 type="checkbox"
-                checked={Boolean(anticoag.apttNormal)}
-                onChange={(e) => onAnticoagChange("apttNormal", e.target.checked, "checkbox")}
+                checked={Boolean(anticoag.catheterInSitu)}
+                onChange={(e) => onAnticoagChange("catheterInSitu", e.target.checked, "checkbox")}
               />
-              <span>APTT ratio currently normal</span>
+              <span>Neuraxial catheter in situ</span>
             </label>
-          ) : null}
-          <label className="checkbox">
-            <input
-              type="checkbox"
-              checked={Boolean(anticoag.catheterInSitu)}
-              onChange={(e) => onAnticoagChange("catheterInSitu", e.target.checked, "checkbox")}
-            />
-            <span>Neuraxial catheter in situ</span>
-          </label>
-          <label className="checkbox">
-            <input
-              type="checkbox"
-              checked={Boolean(anticoag.traumaticPuncture)}
-              onChange={(e) => onAnticoagChange("traumaticPuncture", e.target.checked, "checkbox")}
-            />
-            <span>Traumatic / bloody puncture</span>
-          </label>
-        </div>
-        <article className={`anticoag-box ${anticoagAssessment.status}`}>
-          <h3>{anticoagAssessment.headline}</h3>
-          <p><strong>Pre-block timing:</strong> {anticoagAssessment.beforeBlockMessage}</p>
-          <p><strong>Catheter guidance:</strong> {anticoagAssessment.catheterMessage}</p>
-          <p><strong>After block:</strong> {anticoagAssessment.nextDoseMessage}</p>
-          <p className="hint">{anticoagAssessment.procedureMessage}</p>
-          <p className="hint"><strong>Chart note draft:</strong> {anticoagAssessment.chartNote}</p>
-        </article>
+            <label className="checkbox">
+              <input
+                type="checkbox"
+                checked={Boolean(anticoag.traumaticPuncture)}
+                onChange={(e) => onAnticoagChange("traumaticPuncture", e.target.checked, "checkbox")}
+              />
+              <span>Traumatic / bloody puncture</span>
+            </label>
+          </div>
+          <article className={`anticoag-box ${anticoagAssessment.status}`}>
+            <h3>{anticoagAssessment.headline}</h3>
+            <p><strong>Pre-block timing:</strong> {anticoagAssessment.beforeBlockMessage}</p>
+            <p><strong>Catheter guidance:</strong> {anticoagAssessment.catheterMessage}</p>
+            <p><strong>After block:</strong> {anticoagAssessment.nextDoseMessage}</p>
+            <p className="hint">{anticoagAssessment.procedureMessage}</p>
+            <p className="hint"><strong>Chart note draft:</strong> {anticoagAssessment.chartNote}</p>
+          </article>
 
-        <h2>Peri-op Diabetes Medication Rules</h2>
-        <p className="hint">Quick non-insulin oral/injectable medication prompts for elective surgery pathways.</p>
-        <div className="actions two">
-          <a className="button-link" href={DIABETES_GUIDANCE_LINKS.page} target="_blank" rel="noreferrer">
-            Open CPOC diabetes page
-          </a>
-          <a className="button-link" href={DIABETES_GUIDANCE_LINKS.pdf} target="_blank" rel="noreferrer">
-            Open CPOC diabetes PDF
-          </a>
-        </div>
-        <div className="grid three">
-          <label>
-            Medication class
-            <select
-              value={diabetes.medicationKey}
-              onChange={(e) => onDiabetesChange("medicationKey", e.target.value)}
-            >
-              {DIABETES_MEDICATION_RULES.map((item) => (
-                <option key={item.key} value={item.key}>{item.label}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Surgery timing
-            <select
-              value={diabetes.surgeryTiming}
-              onChange={(e) => onDiabetesChange("surgeryTiming", e.target.value)}
-            >
-              {DIABETES_SURGERY_TIMING_OPTIONS.map((item) => (
-                <option key={item.value} value={item.value}>{item.label}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            eGFR (mL/min/1.73m2)
-            <input
-              type="number"
-              min={0}
-              max={180}
-              step={1}
-              value={diabetes.egfrMlMin}
-              onChange={(e) => onDiabetesChange("egfrMlMin", e.target.value, "number")}
-            />
-          </label>
-        </div>
-        <div className="grid three checks">
-          <label className="checkbox">
-            <input
-              type="checkbox"
-              checked={Boolean(diabetes.contrastPlanned)}
-              onChange={(e) => onDiabetesChange("contrastPlanned", e.target.checked, "checkbox")}
-            />
-            <span>IV contrast planned today</span>
-          </label>
-          <label className="checkbox">
-            <input
-              type="checkbox"
-              checked={Boolean(diabetes.eatingByEvening)}
-              onChange={(e) => onDiabetesChange("eatingByEvening", e.target.checked, "checkbox")}
-            />
-            <span>Expected to eat by evening</span>
-          </label>
-        </div>
-        <article className="metric-card">
-          <h3>{diabetesAssessment.headline}</h3>
-          <p><strong>Day before:</strong> {diabetesAssessment.dayBefore}</p>
-          <p><strong>Day of surgery:</strong> {diabetesAssessment.action}</p>
-          {diabetesAssessment.notes.length ? (
+          <h3>Local Anaesthetic Max Dose (Weight-based)</h3>
+          <p className="hint">
+            Uses common adult maxima. Always use the lower total dose in frailty, hepatic/cardiac disease, pregnancy, or mixed-agent plans.
+          </p>
+          <details className="details small">
+            <summary>References</summary>
             <ul>
-              {diabetesAssessment.notes.map((note) => (
-                <li key={note}>{note}</li>
+              <li><a href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.bupivacaine} target="_blank" rel="noreferrer">Bupivacaine SmPC</a></li>
+              <li><a href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.levobupivacaine} target="_blank" rel="noreferrer">Levobupivacaine SmPC</a></li>
+              <li><a href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.supporting_weight_table} target="_blank" rel="noreferrer">UK supporting weight-based table</a></li>
+            </ul>
+          </details>
+          <div className="grid three">
+            <label>
+              Dosing weight basis
+              <select
+                value={laDose.weightMode}
+                onChange={(e) => onLocalDoseChange("weightMode", e.target.value)}
+              >
+                {LOCAL_ANAESTHETIC_WEIGHT_MODES.map((item) => (
+                  <option key={item.value} value={item.value}>{item.label}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Custom weight (kg)
+              <input
+                type="number"
+                min={1}
+                max={300}
+                step={0.1}
+                value={laDose.customWeightKg}
+                onChange={(e) => onLocalDoseChange("customWeightKg", e.target.value, "number")}
+                disabled={laDose.weightMode !== "custom"}
+              />
+            </label>
+            <label>
+              Active dosing weight (kg)
+              <input type="number" value={localAnaestheticWeightKg} readOnly />
+            </label>
+          </div>
+          <div className="table-wrap">
+            <table className="simple-table">
+              <thead>
+                <tr>
+                  <th>Drug</th>
+                  <th>mg/kg</th>
+                  <th>Absolute cap (mg)</th>
+                  <th>Calculated max (mg)</th>
+                  <th>Approx max volume</th>
+                </tr>
+              </thead>
+              <tbody>
+                {localAnaestheticMaximums.map((drug) => (
+                  <tr key={drug.key}>
+                    <td>{drug.label}</td>
+                    <td>{drug.mgPerKg}</td>
+                    <td>{drug.maxMg}</td>
+                    <td>{drug.maxRecommendedMg}</td>
+                    <td>{drug.maxVolumeMlAtCommonConcentration} mL @ {drug.concentrationLabel}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <details className="details small">
+            <summary>Dose assumptions used</summary>
+            <ul>
+              {localAnaestheticMaximums.map((drug) => (
+                <li key={drug.key}>{drug.label}: {drug.note}</li>
               ))}
             </ul>
-          ) : null}
-          <p className="hint"><strong>Chart note draft:</strong> {diabetesAssessment.chartNote}</p>
-        </article>
-        <div className="table-wrap">
-          <table className="simple-table">
-            <thead>
-              <tr>
-                <th>Medication</th>
-                <th>Day before</th>
-                <th>AM list</th>
-                <th>PM list</th>
-              </tr>
-            </thead>
-            <tbody>
-              {DIABETES_MEDICATION_RULES.map((item) => (
-                <tr key={item.key}>
-                  <td>{item.label}</td>
-                  <td>{item.dayBefore}</td>
-                  <td>{item.dayOfAm}</td>
-                  <td>{item.dayOfPm}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          </details>
+          <p className="hint">
+            Cumulative toxicity across local anaesthetic agents is additive. If mixing agents, keep the summed fractional maximum below 1.
+          </p>
+        </details>
 
-        <h2>Local Anaesthetic Max Dose (Weight-based)</h2>
-        <p className="hint">
-          Uses common adult maxima. Always use the lower total dose in frailty, hepatic/cardiac disease, pregnancy, or mixed-agent plans.
-        </p>
-        <div className="actions two">
-          <a className="button-link" href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.lidocaine} target="_blank" rel="noreferrer">
-            Lidocaine SmPC
-          </a>
-          <a className="button-link" href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.prilocaine} target="_blank" rel="noreferrer">
-            Prilocaine SmPC
-          </a>
-        </div>
-        <details className="details small">
-          <summary>More local anaesthetic references</summary>
-          <ul>
-            <li><a href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.bupivacaine} target="_blank" rel="noreferrer">Bupivacaine SmPC</a></li>
-            <li><a href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.levobupivacaine} target="_blank" rel="noreferrer">Levobupivacaine SmPC</a></li>
-            <li><a href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.supporting_weight_table} target="_blank" rel="noreferrer">UK supporting weight-based table</a></li>
-          </ul>
+        <details className="details">
+          <summary>Peri-op Diabetes Medication Rules</summary>
+          <p className="hint">Quick non-insulin oral/injectable medication prompts for elective surgery pathways.</p>
+          <div className="actions two">
+            <a className="button-link" href={DIABETES_GUIDANCE_LINKS.page} target="_blank" rel="noreferrer">
+              Open CPOC diabetes page
+            </a>
+            <a className="button-link" href={DIABETES_GUIDANCE_LINKS.pdf} target="_blank" rel="noreferrer">
+              Open CPOC diabetes PDF
+            </a>
+          </div>
+          <div className="grid three">
+            <label>
+              Medication class
+              <select
+                value={diabetes.medicationKey}
+                onChange={(e) => onDiabetesChange("medicationKey", e.target.value)}
+              >
+                {DIABETES_MEDICATION_RULES.map((item) => (
+                  <option key={item.key} value={item.key}>{item.label}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Surgery timing
+              <select
+                value={diabetes.surgeryTiming}
+                onChange={(e) => onDiabetesChange("surgeryTiming", e.target.value)}
+              >
+                {DIABETES_SURGERY_TIMING_OPTIONS.map((item) => (
+                  <option key={item.value} value={item.value}>{item.label}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              eGFR (mL/min/1.73m2)
+              <input
+                type="number"
+                min={0}
+                max={180}
+                step={1}
+                value={diabetes.egfrMlMin}
+                onChange={(e) => onDiabetesChange("egfrMlMin", e.target.value, "number")}
+              />
+            </label>
+          </div>
+          <div className="grid three checks">
+            <label className="checkbox">
+              <input
+                type="checkbox"
+                checked={Boolean(diabetes.contrastPlanned)}
+                onChange={(e) => onDiabetesChange("contrastPlanned", e.target.checked, "checkbox")}
+              />
+              <span>IV contrast planned today</span>
+            </label>
+            <label className="checkbox">
+              <input
+                type="checkbox"
+                checked={Boolean(diabetes.eatingByEvening)}
+                onChange={(e) => onDiabetesChange("eatingByEvening", e.target.checked, "checkbox")}
+              />
+              <span>Expected to eat by evening</span>
+            </label>
+          </div>
+          <article className="metric-card">
+            <h3>{diabetesAssessment.headline}</h3>
+            <p><strong>Day before:</strong> {diabetesAssessment.dayBefore}</p>
+            <p><strong>Day of surgery:</strong> {diabetesAssessment.action}</p>
+            {diabetesAssessment.notes.length ? (
+              <ul>
+                {diabetesAssessment.notes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            ) : null}
+            <p className="hint"><strong>Chart note draft:</strong> {diabetesAssessment.chartNote}</p>
+          </article>
         </details>
-        <div className="grid three">
-          <label>
-            Dosing weight basis
-            <select
-              value={laDose.weightMode}
-              onChange={(e) => onLocalDoseChange("weightMode", e.target.value)}
-            >
-              {LOCAL_ANAESTHETIC_WEIGHT_MODES.map((item) => (
-                <option key={item.value} value={item.value}>{item.label}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Custom weight (kg)
-            <input
-              type="number"
-              min={1}
-              max={300}
-              step={0.1}
-              value={laDose.customWeightKg}
-              onChange={(e) => onLocalDoseChange("customWeightKg", e.target.value, "number")}
-              disabled={laDose.weightMode !== "custom"}
-            />
-          </label>
-          <label>
-            Active dosing weight (kg)
-            <input type="number" value={localAnaestheticWeightKg} readOnly />
-          </label>
-        </div>
-        <div className="table-wrap">
-          <table className="simple-table">
-            <thead>
-              <tr>
-                <th>Drug</th>
-                <th>mg/kg</th>
-                <th>Absolute cap (mg)</th>
-                <th>Calculated max (mg)</th>
-                <th>Approx max volume</th>
-              </tr>
-            </thead>
-            <tbody>
-              {localAnaestheticMaximums.map((drug) => (
-                <tr key={drug.key}>
-                  <td>{drug.label}</td>
-                  <td>{drug.mgPerKg}</td>
-                  <td>{drug.maxMg}</td>
-                  <td>{drug.maxRecommendedMg}</td>
-                  <td>{drug.maxVolumeMlAtCommonConcentration} mL @ {drug.concentrationLabel}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <details className="details small">
-          <summary>Dose assumptions used</summary>
-          <ul>
-            {localAnaestheticMaximums.map((drug) => (
-              <li key={drug.key}>{drug.label}: {drug.note}</li>
-            ))}
-          </ul>
-        </details>
-        <p className="hint">
-          Cumulative toxicity across local anaesthetic agents is additive. If mixing agents, keep the summed fractional maximum below 1.
-        </p>
 
         <h2>1) Select Scores</h2>
         <p className="hint">Choose scores first. Required inputs are then shown automatically.</p>
