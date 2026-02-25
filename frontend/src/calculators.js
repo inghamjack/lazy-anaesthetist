@@ -186,6 +186,14 @@ export const MANUAL_CALCULATOR_LINKS = {
   acs_nsqip_manual: { label: "Open ACS NSQIP Risk Calculator", url: "https://riskcalculator.facs.org/RiskCalculator/" },
 };
 
+export const CASE_RISK_SCORE_BUNDLE = [
+  "gupta_mica",
+  "ariscat",
+  "sort",
+  "nela_manual",
+  "acs_nsqip_manual",
+];
+
 export const NUMERIC_INPUTS = {
   respiratory_rate: { label: "Respiratory rate", min: 0, max: 80, default: 18, step: 1, kind: "int" },
   oxygen_saturation: { label: "Oxygen saturation (%)", min: 0, max: 100, default: 98, step: 1, kind: "int" },
@@ -338,6 +346,56 @@ export function buildInitialUnavailable() {
     unavailable[k] = false;
   });
   return unavailable;
+}
+
+function roundTo(value, decimals = 1) {
+  const factor = 10 ** decimals;
+  return Math.round(value * factor) / factor;
+}
+
+export function computeCaseBasics({ age, height_cm, weight_kg, sex_at_birth }) {
+  const safeAge = Number.isFinite(age) ? age : 0;
+  const safeHeightCm = Number.isFinite(height_cm) ? height_cm : 170;
+  const safeWeightKg = Number.isFinite(weight_kg) ? weight_kg : 75;
+  const height_m = Math.max(safeHeightCm, 1) / 100;
+  const bmi = safeWeightKg / (height_m ** 2);
+
+  const isMale = sex_at_birth === "male";
+  const ibw = isMale
+    ? 50 + 0.9 * (safeHeightCm - 152)
+    : 45.5 + 0.9 * (safeHeightCm - 152);
+
+  const lbw = isMale
+    ? (9270 * safeWeightKg) / (6680 + 216 * bmi)
+    : (9270 * safeWeightKg) / (8780 + 244 * bmi);
+
+  const tidal6 = 6 * ibw;
+  const tidal7 = 7 * ibw;
+  const tidal8 = 8 * ibw;
+
+  const bloodVolumeLiters = isMale
+    ? 0.3669 * (height_m ** 3) + 0.03219 * safeWeightKg + 0.6041
+    : 0.3561 * (height_m ** 3) + 0.03308 * safeWeightKg + 0.1833;
+  const bloodVolumeMl = bloodVolumeLiters * 1000;
+
+  return {
+    demographics: {
+      age: Number.parseInt(safeAge, 10),
+      height_cm: roundTo(safeHeightCm, 1),
+      weight_kg: roundTo(safeWeightKg, 1),
+      sex_at_birth,
+    },
+    bmi: roundTo(bmi, 1),
+    ideal_body_weight_kg: roundTo(ibw, 1),
+    lean_body_weight_kg: roundTo(lbw, 1),
+    ideal_tidal_volume_ml: {
+      low_6_ml_per_kg: roundTo(tidal6, 0),
+      target_7_ml_per_kg: roundTo(tidal7, 0),
+      high_8_ml_per_kg: roundTo(tidal8, 0),
+    },
+    estimated_blood_volume_ml: roundTo(bloodVolumeMl, 0),
+    estimated_blood_volume_l: roundTo(bloodVolumeLiters, 2),
+  };
 }
 
 function computeWilson(i) {
@@ -724,4 +782,3 @@ export function summaryText(results) {
   }
   return lines.join("\n");
 }
-

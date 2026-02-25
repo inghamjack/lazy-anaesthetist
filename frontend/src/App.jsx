@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   BOOLEAN_INPUTS,
+  CASE_RISK_SCORE_BUNDLE,
   CATEGORY_META,
   CHOICE_INPUTS,
   MANUAL_CALCULATOR_LINKS,
@@ -10,14 +11,23 @@ import {
   SCORE_EVIDENCE,
   buildInitialUnavailable,
   buildInitialValues,
+  computeCaseBasics,
   computeScores,
   fieldLabel,
   summaryText,
 } from "./calculators";
 
+const AUTO_POPULATED_FIELDS = new Set(["age", "bmi", "male", "female"]);
+
 function App() {
   const [form, setForm] = useState(buildInitialValues);
   const [unavailable, setUnavailable] = useState(buildInitialUnavailable);
+  const [demographics, setDemographics] = useState({
+    age: 45,
+    sex_at_birth: "male",
+    height_cm: 170,
+    weight_kg: 75,
+  });
   const [selectedMap, setSelectedMap] = useState(() => {
     const initial = {};
     for (const score of SCORE_DEFINITIONS) initial[score.key] = false;
@@ -45,6 +55,13 @@ function App() {
     return fields;
   }, [scoreMap, selectedScores]);
 
+  const requiredUserInputFields = useMemo(
+    () => [...requiredFields].filter((field) => !AUTO_POPULATED_FIELDS.has(field)),
+    [requiredFields]
+  );
+
+  const caseBasics = useMemo(() => computeCaseBasics(demographics), [demographics]);
+
   const groupedScores = useMemo(() => {
     const grouped = { elective: [], emergency: [], both: [] };
     for (const score of SCORE_DEFINITIONS) {
@@ -63,9 +80,23 @@ function App() {
       parsed[field] = cfg.kind === "int" ? Number.parseInt(form[field], 10) : Number.parseFloat(form[field]);
     }
     for (const field of Object.keys(BOOLEAN_INPUTS)) parsed[field] = Boolean(form[field]);
-    for (const field of Object.keys(CHOICE_INPUTS)) parsed[field] = form[field];
+    for (const [field, cfg] of Object.entries(CHOICE_INPUTS)) {
+      const isNumericChoice = typeof cfg.options[0]?.value === "number";
+      parsed[field] = isNumericChoice ? Number.parseInt(form[field], 10) : form[field];
+    }
     return parsed;
   }, [form]);
+
+  const mergedInputValues = useMemo(
+    () => ({
+      ...inputValues,
+      age: Number.parseInt(demographics.age, 10),
+      bmi: caseBasics.bmi,
+      male: demographics.sex_at_birth === "male",
+      female: demographics.sex_at_birth === "female",
+    }),
+    [caseBasics.bmi, demographics.age, demographics.sex_at_birth, inputValues]
+  );
 
   const selectedCount = selectedScores.length;
 
@@ -87,8 +118,31 @@ function App() {
     setError("");
   };
 
+  const onSelectRiskBundle = () => {
+    const selected = {};
+    for (const score of SCORE_DEFINITIONS) {
+      selected[score.key] = CASE_RISK_SCORE_BUNDLE.includes(score.key);
+    }
+    setSelectedMap(selected);
+    setResults([]);
+    setWarnings([]);
+    setError("");
+  };
+
   const onToggleScore = (key, checked) => {
     setSelectedMap((prev) => ({ ...prev, [key]: checked }));
+    setResults([]);
+    setWarnings([]);
+    setError("");
+  };
+
+  const onDemographicChange = (name, value) => {
+    setDemographics((prev) => ({
+      ...prev,
+      [name]: name === "sex_at_birth"
+        ? value
+        : (Number.isFinite(Number.parseFloat(value)) ? Number.parseFloat(value) : prev[name]),
+    }));
     setResults([]);
     setWarnings([]);
     setError("");
@@ -137,7 +191,7 @@ function App() {
     }
 
     try {
-      const computed = computeScores(computable, inputValues);
+      const computed = computeScores(computable, mergedInputValues);
       setResults(computed);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to compute scores.");
@@ -179,6 +233,73 @@ function App() {
       <section className="panel">
         <h1>The Lazy Anaethetist - A Compilation of Scores in Elective & Emergency Anaesthesia</h1>
 
+        <h2>Case Basics</h2>
+        <p className="hint">Enter demographics once to generate core case metrics and auto-fill age/sex/BMI for relevant scores.</p>
+        <div className="grid four">
+          <label>
+            Age
+            <input
+              type="number"
+              min={0}
+              max={130}
+              step={1}
+              value={demographics.age}
+              onChange={(e) => onDemographicChange("age", e.target.value)}
+            />
+          </label>
+          <label>
+            Sex at birth
+            <select
+              value={demographics.sex_at_birth}
+              onChange={(e) => onDemographicChange("sex_at_birth", e.target.value)}
+            >
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </label>
+          <label>
+            Height (cm)
+            <input
+              type="number"
+              min={80}
+              max={250}
+              step={0.1}
+              value={demographics.height_cm}
+              onChange={(e) => onDemographicChange("height_cm", e.target.value)}
+            />
+          </label>
+          <label>
+            Weight (kg)
+            <input
+              type="number"
+              min={1}
+              max={400}
+              step={0.1}
+              value={demographics.weight_kg}
+              onChange={(e) => onDemographicChange("weight_kg", e.target.value)}
+            />
+          </label>
+        </div>
+        <div className="metric-grid">
+          <article className="metric-card">
+            <h3>Body Weight Targets</h3>
+            <p><strong>IBW:</strong> {caseBasics.ideal_body_weight_kg} kg</p>
+            <p><strong>LBW (Janmahasatian):</strong> {caseBasics.lean_body_weight_kg} kg</p>
+            <p><strong>BMI:</strong> {caseBasics.bmi} kg/m2</p>
+          </article>
+          <article className="metric-card">
+            <h3>Ideal Tidal Volume (IBW)</h3>
+            <p><strong>6 ml/kg:</strong> {caseBasics.ideal_tidal_volume_ml.low_6_ml_per_kg} ml</p>
+            <p><strong>7 ml/kg target:</strong> {caseBasics.ideal_tidal_volume_ml.target_7_ml_per_kg} ml</p>
+            <p><strong>8 ml/kg:</strong> {caseBasics.ideal_tidal_volume_ml.high_8_ml_per_kg} ml</p>
+          </article>
+          <article className="metric-card">
+            <h3>Estimated Blood Volume</h3>
+            <p><strong>{caseBasics.estimated_blood_volume_ml} ml</strong> ({caseBasics.estimated_blood_volume_l} L)</p>
+            <p className="hint">Nadler formula (height + weight + sex-specific constants).</p>
+          </article>
+        </div>
+
         <h2>1) Select Scores</h2>
         <p className="hint">Choose scores first. Required inputs are then shown automatically.</p>
 
@@ -190,8 +311,9 @@ function App() {
           ))}
         </div>
 
-        <div className="actions two">
+        <div className="actions three">
           <button type="button" onClick={onSelectAll}>Select all scores</button>
+          <button type="button" onClick={onSelectRiskBundle}>Mortality/morbidity bundle</button>
           <button type="button" onClick={onClearSelection} className="ghost">Clear score selection</button>
         </div>
 
@@ -270,12 +392,20 @@ function App() {
         {selectedCount > 0 ? (
           <>
             <h2>2) Enter Required Inputs</h2>
+            {[...requiredFields].some((field) => AUTO_POPULATED_FIELDS.has(field)) ? (
+              <p className="hint">
+                Auto-filled from demographics: {[...requiredFields]
+                  .filter((field) => AUTO_POPULATED_FIELDS.has(field))
+                  .map((field) => fieldLabel(field))
+                  .join(", ")}.
+              </p>
+            ) : null}
 
-            {[...requiredFields].some((f) => NUMERIC_INPUTS[f]) ? (
+            {requiredUserInputFields.some((f) => NUMERIC_INPUTS[f]) ? (
               <>
                 <h3>Patient Inputs</h3>
                 <div className="grid three">
-                  {[...requiredFields]
+                  {requiredUserInputFields
                     .filter((f) => NUMERIC_INPUTS[f])
                     .map((field) => {
                       const cfg = NUMERIC_INPUTS[field];
@@ -319,11 +449,11 @@ function App() {
               </>
             ) : null}
 
-            {[...requiredFields].some((f) => CHOICE_INPUTS[f]) ? (
+            {requiredUserInputFields.some((f) => CHOICE_INPUTS[f]) ? (
               <>
                 <h3>Selections</h3>
                 <div className="grid two">
-                  {[...requiredFields]
+                  {requiredUserInputFields
                     .filter((f) => CHOICE_INPUTS[f])
                     .map((field) => {
                       const cfg = CHOICE_INPUTS[field];
@@ -342,11 +472,11 @@ function App() {
               </>
             ) : null}
 
-            {[...requiredFields].some((f) => BOOLEAN_INPUTS[f]) ? (
+            {requiredUserInputFields.some((f) => BOOLEAN_INPUTS[f]) ? (
               <>
                 <h3>Boolean Flags</h3>
                 <div className="grid three checks">
-                  {[...requiredFields]
+                  {requiredUserInputFields
                     .filter((f) => BOOLEAN_INPUTS[f])
                     .map((field) => (
                       <label className="checkbox" key={field}>
