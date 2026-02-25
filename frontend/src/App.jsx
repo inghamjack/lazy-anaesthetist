@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 import {
+  ANTICOAG_DRUG_OPTIONS,
+  ANTICOAG_GUIDANCE_LINKS,
+  ANTICOAG_PROCEDURE_OPTIONS,
   BOOLEAN_INPUTS,
   CASE_RISK_SCORE_BUNDLE,
   CATEGORY_META,
@@ -12,6 +15,7 @@ import {
   SCORE_EVIDENCE,
   buildInitialUnavailable,
   buildInitialValues,
+  computeAnticoagSafety,
   computeCaseBasics,
   computeScores,
   fieldLabel,
@@ -41,6 +45,15 @@ function App() {
   const [error, setError] = useState("");
   const [regionalSearch, setRegionalSearch] = useState("");
   const [selectedRegionalSite, setSelectedRegionalSite] = useState("");
+  const [anticoag, setAnticoag] = useState({
+    entryId: "apixaban_prophylaxis",
+    procedureRisk: "neuraxial",
+    hoursSinceLastDose: 24,
+    inr: 1.1,
+    apttNormal: false,
+    catheterInSitu: false,
+    traumaticPuncture: false,
+  });
 
   const scoreMap = useMemo(
     () => Object.fromEntries(SCORE_DEFINITIONS.map((item) => [item.key, item])),
@@ -113,6 +126,19 @@ function App() {
     () => REGIONAL_SUGGESTIONS.find((item) => item.key === selectedRegionalSite),
     [selectedRegionalSite]
   );
+  const anticoagGroups = useMemo(() => {
+    const groups = {};
+    for (const item of ANTICOAG_DRUG_OPTIONS) {
+      if (!groups[item.group]) groups[item.group] = [];
+      groups[item.group].push(item);
+    }
+    return groups;
+  }, []);
+  const selectedAnticoagEntry = useMemo(
+    () => ANTICOAG_DRUG_OPTIONS.find((item) => item.id === anticoag.entryId) ?? null,
+    [anticoag.entryId]
+  );
+  const anticoagAssessment = useMemo(() => computeAnticoagSafety(anticoag), [anticoag]);
 
   const onSelectAll = () => {
     const all = {};
@@ -167,6 +193,17 @@ function App() {
     setResults([]);
     setWarnings([]);
     setError("");
+  };
+
+  const onAnticoagChange = (name, value, type = "text") => {
+    setAnticoag((prev) => {
+      if (type === "checkbox") return { ...prev, [name]: Boolean(value) };
+      if (type === "number") {
+        const parsed = Number.parseFloat(value);
+        return { ...prev, [name]: Number.isFinite(parsed) ? parsed : prev[name] };
+      }
+      return { ...prev, [name]: value };
+    });
   };
 
   const onInputChange = (name, value, type) => {
@@ -388,6 +425,108 @@ function App() {
             <p className="hint"><strong>Caution:</strong> {regionalSuggestion.caution}</p>
           </article>
         ) : null}
+
+        <h2>Anticoagulant & Regional Safety</h2>
+        <p className="hint">
+          UK Association guidance-based timing prompt (2013 table values; guidance page states it is under review).
+          Confirm against current local policy before proceeding.
+        </p>
+        <div className="actions two">
+          <a className="button-link" href={ANTICOAG_GUIDANCE_LINKS.summary_page} target="_blank" rel="noreferrer">
+            Open UK guidance page
+          </a>
+          <a className="button-link" href={ANTICOAG_GUIDANCE_LINKS.pdf_mirror} target="_blank" rel="noreferrer">
+            Open UK guidance PDF
+          </a>
+        </div>
+        <div className="grid three">
+          <label>
+            Procedure type
+            <select
+              value={anticoag.procedureRisk}
+              onChange={(e) => onAnticoagChange("procedureRisk", e.target.value)}
+            >
+              {ANTICOAG_PROCEDURE_OPTIONS.map((item) => (
+                <option key={item.value} value={item.value}>{item.label}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Anticoagulant / antiplatelet
+            <select
+              value={anticoag.entryId}
+              onChange={(e) => onAnticoagChange("entryId", e.target.value)}
+            >
+              {Object.entries(anticoagGroups).map(([group, items]) => (
+                <optgroup key={group} label={group}>
+                  {items.map((item) => (
+                    <option key={item.id} value={item.id}>{item.label}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </label>
+          <label>
+            Hours since last dose
+            <input
+              type="number"
+              min={0}
+              max={400}
+              step={0.1}
+              value={anticoag.hoursSinceLastDose}
+              onChange={(e) => onAnticoagChange("hoursSinceLastDose", e.target.value, "number")}
+            />
+          </label>
+        </div>
+        <div className="grid three checks">
+          {selectedAnticoagEntry?.requiresInrLe ? (
+            <label>
+              INR
+              <input
+                type="number"
+                min={0.8}
+                max={10}
+                step={0.1}
+                value={anticoag.inr}
+                onChange={(e) => onAnticoagChange("inr", e.target.value, "number")}
+              />
+            </label>
+          ) : null}
+          {selectedAnticoagEntry?.requiresNormalAptt ? (
+            <label className="checkbox">
+              <input
+                type="checkbox"
+                checked={Boolean(anticoag.apttNormal)}
+                onChange={(e) => onAnticoagChange("apttNormal", e.target.checked, "checkbox")}
+              />
+              <span>APTT ratio currently normal</span>
+            </label>
+          ) : null}
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={Boolean(anticoag.catheterInSitu)}
+              onChange={(e) => onAnticoagChange("catheterInSitu", e.target.checked, "checkbox")}
+            />
+            <span>Neuraxial catheter in situ</span>
+          </label>
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={Boolean(anticoag.traumaticPuncture)}
+              onChange={(e) => onAnticoagChange("traumaticPuncture", e.target.checked, "checkbox")}
+            />
+            <span>Traumatic / bloody puncture</span>
+          </label>
+        </div>
+        <article className={`anticoag-box ${anticoagAssessment.status}`}>
+          <h3>{anticoagAssessment.headline}</h3>
+          <p><strong>Pre-block timing:</strong> {anticoagAssessment.beforeBlockMessage}</p>
+          <p><strong>Catheter guidance:</strong> {anticoagAssessment.catheterMessage}</p>
+          <p><strong>After block:</strong> {anticoagAssessment.nextDoseMessage}</p>
+          <p className="hint">{anticoagAssessment.procedureMessage}</p>
+          <p className="hint"><strong>Chart note draft:</strong> {anticoagAssessment.chartNote}</p>
+        </article>
 
         <h2>1) Select Scores</h2>
         <p className="hint">Choose scores first. Required inputs are then shown automatically.</p>

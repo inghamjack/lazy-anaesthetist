@@ -302,6 +302,215 @@ export const REGIONAL_SUGGESTIONS = [
   },
 ];
 
+export const ANTICOAG_GUIDANCE_LINKS = {
+  summary_page:
+    "https://anaesthetists.org/Guidelines-and-publications/Guidelines/Regional-anaesthesia-and-patients-with-abnormalities-of-coagulation",
+  pdf_mirror:
+    "https://www.anaesthetists.org/Portals/0/PDFs/Guidelines%20PDFs/Guideline_regional_anaesthesia_patients_abnormalities_coagulation_2013_final.pdf",
+};
+
+export const ANTICOAG_PROCEDURE_OPTIONS = [
+  { value: "neuraxial", label: "Spinal / epidural (neuraxial)" },
+  { value: "deep", label: "Deep peripheral / non-compressible block" },
+  { value: "superficial", label: "Superficial / compressible peripheral block" },
+];
+
+export const ANTICOAG_DRUG_OPTIONS = [
+  {
+    id: "ufh_sc_prophylaxis",
+    group: "Heparins",
+    label: "UFH SC prophylaxis",
+    minBeforeHours: 4,
+    minBeforeText: "4 h or normal APTT ratio",
+    requiresNormalAptt: true,
+    catheterPolicy: "caution",
+    nextDoseText: "1 h after block performance or catheter removal",
+  },
+  {
+    id: "ufh_iv_treatment",
+    group: "Heparins",
+    label: "UFH IV treatment",
+    minBeforeHours: 4,
+    minBeforeText: "4 h or normal APTT ratio",
+    requiresNormalAptt: true,
+    catheterPolicy: "caution",
+    nextDoseText: "4 h after block performance or catheter removal",
+  },
+  {
+    id: "lmwh_sc_prophylaxis",
+    group: "Heparins",
+    label: "LMWH SC prophylaxis",
+    minBeforeHours: 12,
+    minBeforeText: "12 h",
+    catheterPolicy: "caution",
+    nextDoseText: "4 h after block performance or catheter removal",
+  },
+  {
+    id: "lmwh_sc_treatment",
+    group: "Heparins",
+    label: "LMWH SC treatment",
+    minBeforeHours: 24,
+    minBeforeText: "24 h",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "4 h after block/catheter removal (consider 24 h if traumatic puncture)",
+  },
+  {
+    id: "fondaparinux_prophylaxis",
+    group: "Heparin alternatives",
+    label: "Fondaparinux prophylaxis",
+    minBeforeHours: 42,
+    minBeforeText: "36-42 h (consider anti-Xa)",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6-12 h after block/catheter removal",
+  },
+  {
+    id: "fondaparinux_treatment",
+    group: "Heparin alternatives",
+    label: "Fondaparinux treatment",
+    avoidNeuraxialDeep: true,
+    minBeforeText: "Avoid for neuraxial/deep blocks (consider anti-Xa)",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "12 h after block/catheter removal",
+  },
+  {
+    id: "argatroban",
+    group: "Heparin alternatives",
+    label: "Argatroban",
+    minBeforeHours: 4,
+    minBeforeText: "4 h or normal APTT ratio",
+    requiresNormalAptt: true,
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "bivalirudin",
+    group: "Heparin alternatives",
+    label: "Bivalirudin",
+    minBeforeHours: 10,
+    minBeforeText: "10 h or normal APTT ratio",
+    requiresNormalAptt: true,
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "aspirin",
+    group: "Antiplatelets",
+    label: "Aspirin",
+    noAdditionalPrecautions: true,
+    minBeforeText: "No additional precautions",
+    catheterPolicy: "no_additional_precautions",
+    nextDoseText: "No additional precautions",
+  },
+  {
+    id: "nsaids",
+    group: "Antiplatelets",
+    label: "NSAIDs",
+    noAdditionalPrecautions: true,
+    minBeforeText: "No additional precautions",
+    catheterPolicy: "no_additional_precautions",
+    nextDoseText: "No additional precautions",
+  },
+  {
+    id: "clopidogrel",
+    group: "Antiplatelets",
+    label: "Clopidogrel",
+    minBeforeHours: 168,
+    minBeforeText: "7 days",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "prasugrel",
+    group: "Antiplatelets",
+    label: "Prasugrel",
+    minBeforeHours: 168,
+    minBeforeText: "7 days",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "ticagrelor",
+    group: "Antiplatelets",
+    label: "Ticagrelor",
+    minBeforeHours: 120,
+    minBeforeText: "5 days",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "warfarin",
+    group: "Oral anticoagulants",
+    label: "Warfarin",
+    requiresInrLe: 1.4,
+    minBeforeText: "INR <= 1.4 (typically 3-5 days after stopping)",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "After catheter removal",
+  },
+  {
+    id: "rivaroxaban_prophylaxis",
+    group: "Oral anticoagulants",
+    label: "Rivaroxaban prophylaxis (CrCl > 30)",
+    minBeforeHours: 18,
+    minBeforeText: "18 h",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "rivaroxaban_treatment",
+    group: "Oral anticoagulants",
+    label: "Rivaroxaban treatment (CrCl > 30)",
+    minBeforeHours: 48,
+    minBeforeText: "48 h",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "dabigatran_crcl_gt_80",
+    group: "Oral anticoagulants",
+    label: "Dabigatran (CrCl > 80)",
+    minBeforeHours: 48,
+    minBeforeText: "48 h",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "dabigatran_crcl_50_80",
+    group: "Oral anticoagulants",
+    label: "Dabigatran (CrCl 50-80)",
+    minBeforeHours: 72,
+    minBeforeText: "72 h",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "dabigatran_crcl_30_50",
+    group: "Oral anticoagulants",
+    label: "Dabigatran (CrCl 30-50)",
+    minBeforeHours: 96,
+    minBeforeText: "96 h",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "apixaban_prophylaxis",
+    group: "Oral anticoagulants",
+    label: "Apixaban prophylaxis",
+    minBeforeHours: 48,
+    minBeforeText: "24-48 h",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "6 h after block/catheter removal",
+  },
+  {
+    id: "thrombolytics",
+    group: "Thrombolytics",
+    label: "Thrombolytics (alteplase/anistreplase/reteplase/streptokinase)",
+    minBeforeHours: 240,
+    minBeforeText: "10 days",
+    catheterPolicy: "not_recommended",
+    nextDoseText: "10 days after block/catheter removal",
+  },
+];
+
 export const NUMERIC_INPUTS = {
   respiratory_rate: { label: "Respiratory rate", min: 0, max: 80, default: 18, step: 1, kind: "int" },
   oxygen_saturation: { label: "Oxygen saturation (%)", min: 0, max: 100, default: 98, step: 1, kind: "int" },
@@ -535,6 +744,120 @@ export function computeCaseBasics({
     pregnancy_adjusted_blood_volume_ml: roundTo(pregnancyAdjustedBloodVolumeMl, 0),
     pregnancy_adjusted_blood_volume_l: roundTo(pregnancyAdjustedBloodVolumeMl / 1000, 2),
     pregnancy_multiplier: roundTo(pregnancyMultiplier, 2),
+  };
+}
+
+const ANTICOAG_OPTION_MAP = Object.fromEntries(ANTICOAG_DRUG_OPTIONS.map((item) => [item.id, item]));
+const ANTICOAG_PROCEDURE_LABELS = Object.fromEntries(ANTICOAG_PROCEDURE_OPTIONS.map((item) => [item.value, item.label]));
+
+export function computeAnticoagSafety({
+  entryId,
+  procedureRisk,
+  hoursSinceLastDose,
+  inr,
+  apttNormal,
+  catheterInSitu,
+  traumaticPuncture,
+}) {
+  const entry = ANTICOAG_OPTION_MAP[entryId] ?? null;
+  if (!entry) {
+    return {
+      status: "caution",
+      headline: "Select an anticoagulant regimen to assess timing.",
+      beforeBlockMessage: "",
+      catheterMessage: "",
+      nextDoseMessage: "",
+      procedureMessage: "",
+      chartNote: "",
+    };
+  }
+
+  const safeHours = Number.isFinite(hoursSinceLastDose) ? hoursSinceLastDose : 0;
+  const safeInr = Number.isFinite(inr) ? inr : null;
+  const highRiskProcedure = procedureRisk !== "superficial";
+
+  let readyForBlock = true;
+  if (entry.avoidNeuraxialDeep && highRiskProcedure) {
+    readyForBlock = false;
+  } else if (entry.noAdditionalPrecautions) {
+    readyForBlock = true;
+  } else if (typeof entry.requiresInrLe === "number") {
+    readyForBlock = safeInr !== null && safeInr <= entry.requiresInrLe;
+  } else if (entry.requiresNormalAptt) {
+    readyForBlock = safeHours >= (entry.minBeforeHours ?? 0) || Boolean(apttNormal);
+  } else if (typeof entry.minBeforeHours === "number") {
+    readyForBlock = safeHours >= entry.minBeforeHours;
+  }
+
+  let status = "ready";
+  let headline = "Timing appears compatible with guidance.";
+  if (entry.avoidNeuraxialDeep && highRiskProcedure) {
+    status = "avoid";
+    headline = "Guidance advises avoiding neuraxial/deep block with this regimen.";
+  } else if (highRiskProcedure && !readyForBlock) {
+    status = "wait";
+    headline = "Not yet within suggested timing for neuraxial/deep block.";
+  } else if (!highRiskProcedure) {
+    status = "caution";
+    headline = "Superficial/compressible block context: lower relative bleeding risk.";
+  }
+
+  let beforeBlockMessage = `Minimum pre-block interval: ${entry.minBeforeText}.`;
+  if (entry.noAdditionalPrecautions) {
+    beforeBlockMessage = "No additional pre-block delay is listed for this drug.";
+  } else if (typeof entry.requiresInrLe === "number") {
+    beforeBlockMessage = `INR requirement: <= ${entry.requiresInrLe}. Current INR: ${
+      safeInr === null ? "not entered" : safeInr
+    }.`;
+  } else if (entry.requiresNormalAptt) {
+    const apttText = apttNormal ? "APTT marked normal." : "APTT not marked normal.";
+    beforeBlockMessage = `${entry.minBeforeText}. Time since dose: ${roundTo(safeHours, 1)} h. ${apttText}`;
+  } else if (typeof entry.minBeforeHours === "number") {
+    const remaining = Math.max(entry.minBeforeHours - safeHours, 0);
+    beforeBlockMessage = `${entry.minBeforeText}. Time since dose: ${roundTo(safeHours, 1)} h${
+      remaining > 0 ? ` (about ${roundTo(remaining, 1)} h remaining)` : ""
+    }.`;
+  }
+
+  const catheterTextMap = {
+    no_additional_precautions: "No additional catheter precautions listed.",
+    caution: "Use caution with neuraxial catheter in situ.",
+    not_recommended: "Not recommended while neuraxial catheter is in situ.",
+    avoid: "Avoid with neuraxial catheter techniques.",
+  };
+  const catheterMessage = catheterInSitu
+    ? `Catheter in situ: ${catheterTextMap[entry.catheterPolicy] ?? "Check full guidance."}`
+    : `If catheter is in situ: ${catheterTextMap[entry.catheterPolicy] ?? "Check full guidance."}`;
+
+  let nextDoseMessage = `Next dose guidance: ${entry.nextDoseText}.`;
+  if (entry.id === "lmwh_sc_treatment" && traumaticPuncture) {
+    nextDoseMessage =
+      "Next dose guidance: 24 h delay after traumatic puncture is advised (instead of the standard 4 h).";
+  }
+
+  const procedureMessageMap = {
+    neuraxial: "Neuraxial blocks are high consequence for bleeding complications.",
+    deep: "Deep/non-compressible peripheral blocks are in the higher-risk category in UK guidance.",
+    superficial:
+      "Superficial/compressible blocks are lower relative risk in UK guidance; use individual judgement and document rationale.",
+  };
+  const procedureMessage = procedureMessageMap[procedureRisk] ?? "";
+  const chartNote = [
+    `Anticoagulation check: ${entry.label}.`,
+    `Procedure: ${ANTICOAG_PROCEDURE_LABELS[procedureRisk] ?? procedureRisk}.`,
+    beforeBlockMessage,
+    catheterMessage,
+    nextDoseMessage,
+  ].join(" ");
+
+  return {
+    status,
+    headline,
+    beforeBlockMessage,
+    catheterMessage,
+    nextDoseMessage,
+    procedureMessage,
+    chartNote,
   };
 }
 
