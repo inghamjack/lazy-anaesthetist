@@ -15,11 +15,14 @@ export const SCORE_CATEGORY = {
   sort: "both",
   gupta_mica: "both",
   ariscat: "both",
+  caprini_vte: "both",
   acs_nsqip_manual: "both",
   news2: "emergency",
   qsofa: "emergency",
   sofa_basic: "emergency",
   nela_manual: "emergency",
+  wfns_sah: "emergency",
+  ich_score: "emergency",
 };
 
 export const SCORE_DEFINITIONS = [
@@ -155,6 +158,57 @@ export const SCORE_DEFINITIONS = [
     description: "Manual entry of ACS NSQIP predicted risks from official calculator.",
     required_fields: ["nsqip_mortality_percent", "nsqip_serious_complication_percent"],
   },
+  {
+    key: "wfns_sah",
+    name: "WFNS SAH Grade",
+    description: "World Federation of Neurosurgical Societies grading scale for aneurysmal SAH.",
+    required_fields: ["gcs", "wfns_focal_motor_deficit"],
+  },
+  {
+    key: "ich_score",
+    name: "ICH Score",
+    description: "Intracerebral hemorrhage severity score for early prognostic stratification.",
+    required_fields: [
+      "age",
+      "gcs",
+      "ich_volume_ml",
+      "ich_intraventricular_hemorrhage",
+      "ich_infratentorial_origin",
+    ],
+  },
+  {
+    key: "caprini_vte",
+    name: "Caprini VTE Risk",
+    description: "Caprini risk assessment model for perioperative venous thromboembolism risk.",
+    required_fields: [
+      "age",
+      "caprini_procedure_points",
+      "caprini_additional_points",
+      "caprini_bmi_gt_25",
+      "caprini_swollen_legs",
+      "caprini_varicose_veins",
+      "caprini_pregnancy_postpartum",
+      "caprini_hormone_therapy_or_ocp",
+      "caprini_sepsis_lt_1_month",
+      "caprini_serious_lung_disease_lt_1_month",
+      "caprini_acute_mi_lt_1_month",
+      "caprini_chf_lt_1_month",
+      "caprini_inflammatory_bowel_disease",
+      "caprini_medical_bed_rest",
+      "caprini_malignancy",
+      "caprini_bed_bound_gt_72h",
+      "caprini_immobilizing_cast",
+      "caprini_central_venous_access",
+      "caprini_prior_vte",
+      "caprini_family_history_vte",
+      "caprini_known_thrombophilia",
+      "caprini_stroke_lt_1_month",
+      "caprini_elective_lower_limb_arthroplasty",
+      "caprini_hip_pelvis_leg_fracture_lt_1_month",
+      "caprini_acute_spinal_cord_injury_lt_1_month",
+      "caprini_multiple_trauma_lt_1_month",
+    ],
+  },
 ];
 
 export const SCORE_MAP = Object.fromEntries(SCORE_DEFINITIONS.map((item) => [item.key, item]));
@@ -179,6 +233,9 @@ export const SCORE_EVIDENCE = {
   gupta_mica: [{ label: "Gupta MICA derivation", url: "https://pubmed.ncbi.nlm.nih.gov/21730309/" }],
   nela_manual: [{ label: "NELA parsimonious risk calculator", url: "https://data.nela.org.uk/Risk/" }],
   acs_nsqip_manual: [{ label: "ACS NSQIP Surgical Risk Calculator", url: "https://riskcalculator.facs.org/RiskCalculator/" }],
+  wfns_sah: [{ label: "WFNS SAH grading scale report", url: "https://pubmed.ncbi.nlm.nih.gov/3236024/" }],
+  ich_score: [{ label: "Original ICH Score derivation", url: "https://pubmed.ncbi.nlm.nih.gov/11283388/" }],
+  caprini_vte: [{ label: "Caprini RAM in perioperative VTE prevention", url: "https://pubmed.ncbi.nlm.nih.gov/33276846/" }],
 };
 
 export const MANUAL_CALCULATOR_LINKS = {
@@ -658,6 +715,8 @@ export const NUMERIC_INPUTS = {
   creatinine_umol_l: { label: "Creatinine (umol/L)", min: 0, max: 2000, default: 80, step: 1, kind: "float" },
   urine_output_ml_day: { label: "Urine output (ml/day)", min: 0, max: 10000, default: 1400, step: 10, kind: "int" },
   surgery_duration_hours: { label: "Surgery duration (hours)", min: 0, max: 24, default: 2, step: 0.1, kind: "float" },
+  ich_volume_ml: { label: "ICH volume (mL)", min: 0, max: 300, default: 20, step: 1, kind: "float" },
+  caprini_additional_points: { label: "Caprini extra points (manual)", min: 0, max: 20, default: 0, step: 1, kind: "int" },
   nela_30_day_mortality_percent: { label: "NELA 30-day mortality (%)", min: 0, max: 100, default: 5, step: 0.1, kind: "float" },
   nsqip_mortality_percent: { label: "NSQIP mortality risk (%)", min: 0, max: 100, default: 1, step: 0.1, kind: "float" },
   nsqip_serious_complication_percent: { label: "NSQIP serious complication risk (%)", min: 0, max: 100, default: 8, step: 0.1, kind: "float" },
@@ -686,6 +745,35 @@ export const BOOLEAN_INPUTS = {
   insulin_therapy_diabetes: { label: "Insulin therapy diabetes", default: false },
   creatinine_gt_2: { label: "Creatinine > 176.8 umol/L", default: false },
   on_vasopressors: { label: "On vasopressors", default: false },
+  wfns_focal_motor_deficit: { label: "WFNS focal motor deficit", default: false },
+  ich_intraventricular_hemorrhage: { label: "ICH intraventricular hemorrhage present", default: false },
+  ich_infratentorial_origin: { label: "ICH infratentorial origin", default: false },
+  caprini_bmi_gt_25: { label: "Caprini: BMI > 25", default: false },
+  caprini_swollen_legs: { label: "Caprini: swollen legs", default: false },
+  caprini_varicose_veins: { label: "Caprini: varicose veins", default: false },
+  caprini_pregnancy_postpartum: { label: "Caprini: pregnancy or postpartum (<1 month)", default: false },
+  caprini_hormone_therapy_or_ocp: { label: "Caprini: hormone therapy / oral contraceptive", default: false },
+  caprini_sepsis_lt_1_month: { label: "Caprini: sepsis (<1 month)", default: false },
+  caprini_serious_lung_disease_lt_1_month: { label: "Caprini: serious lung disease incl pneumonia (<1 month)", default: false },
+  caprini_acute_mi_lt_1_month: { label: "Caprini: acute MI (<1 month)", default: false },
+  caprini_chf_lt_1_month: { label: "Caprini: CHF exacerbation (<1 month)", default: false },
+  caprini_inflammatory_bowel_disease: { label: "Caprini: inflammatory bowel disease", default: false },
+  caprini_medical_bed_rest: { label: "Caprini: medical patient currently on bed rest", default: false },
+  caprini_malignancy: { label: "Caprini: malignancy (current or previous)", default: false },
+  caprini_bed_bound_gt_72h: { label: "Caprini: bed bound >72 h", default: false },
+  caprini_immobilizing_cast: { label: "Caprini: immobilizing cast", default: false },
+  caprini_central_venous_access: { label: "Caprini: central venous access", default: false },
+  caprini_prior_vte: { label: "Caprini: previous VTE", default: false },
+  caprini_family_history_vte: { label: "Caprini: family history of VTE", default: false },
+  caprini_known_thrombophilia: {
+    label: "Caprini: known thrombophilia (e.g. FVL/prothrombin mutation/lupus anticoagulant/HIT)",
+    default: false,
+  },
+  caprini_stroke_lt_1_month: { label: "Caprini: stroke (<1 month)", default: false },
+  caprini_elective_lower_limb_arthroplasty: { label: "Caprini: elective lower-limb arthroplasty", default: false },
+  caprini_hip_pelvis_leg_fracture_lt_1_month: { label: "Caprini: hip/pelvis/leg fracture (<1 month)", default: false },
+  caprini_acute_spinal_cord_injury_lt_1_month: { label: "Caprini: acute spinal cord injury (<1 month)", default: false },
+  caprini_multiple_trauma_lt_1_month: { label: "Caprini: multiple trauma (<1 month)", default: false },
   female: { label: "Female", default: false },
   non_smoker: { label: "Non-smoker", default: true },
   history_ponv_motion_sickness: { label: "Hx PONV/motion sickness", default: false },
@@ -757,6 +845,15 @@ export const CHOICE_INPUTS = {
       { value: "thoracic_non_esophageal_non_cardiac", label: "Thoracic (non-cardiac, non-oesophageal)" },
       { value: "vein", label: "Vein" },
       { value: "urology", label: "Urology" },
+    ],
+  },
+  caprini_procedure_points: {
+    label: "Caprini procedure category",
+    default: 0,
+    options: [
+      { value: 0, label: "No surgical factor selected" },
+      { value: 1, label: "Minor surgery (<45 min)" },
+      { value: 2, label: "Major/laparoscopic >45 min or arthroscopic surgery" },
     ],
   },
 };
@@ -1407,6 +1504,137 @@ function computeNsqipManual(i) {
   };
 }
 
+function computeWfnsSah(i) {
+  const gcs = i.gcs;
+  const deficit = i.wfns_focal_motor_deficit;
+  let grade = 5;
+
+  if (gcs === 15 && !deficit) grade = 1;
+  else if (gcs >= 13 && gcs <= 14 && !deficit) grade = 2;
+  else if (gcs >= 13 && gcs <= 14 && deficit) grade = 3;
+  else if (gcs >= 7 && gcs <= 12) grade = 4;
+  else grade = 5;
+
+  let interpretation = "";
+  let riskEstimate = "";
+  if (grade <= 2) {
+    interpretation = "lower neurologic severity at presentation";
+    riskEstimate = "WFNS grade I-II is generally associated with more favorable outcome than higher grades.";
+  } else if (grade === 3) {
+    interpretation = "intermediate neurologic severity";
+    riskEstimate = "WFNS grade III indicates intermediate risk and requires close monitoring for deterioration.";
+  } else {
+    interpretation = "high neurologic severity at presentation";
+    riskEstimate = "WFNS grade IV-V is associated with substantially worse neurologic outcomes.";
+  }
+
+  return {
+    score: "wfns_sah",
+    value: grade,
+    interpretation: `WFNS grade ${grade}: ${interpretation}`,
+    risk_estimate: riskEstimate,
+    clinical_note: "Use with imaging and aneurysm management planning; serial neurologic exams remain essential.",
+  };
+}
+
+function computeIchScore(i) {
+  let points = 0;
+  if (i.gcs >= 3 && i.gcs <= 4) points += 2;
+  else if (i.gcs >= 5 && i.gcs <= 12) points += 1;
+  if (i.ich_volume_ml >= 30) points += 1;
+  if (i.ich_intraventricular_hemorrhage) points += 1;
+  if (i.ich_infratentorial_origin) points += 1;
+  if (i.age >= 80) points += 1;
+
+  const mortalityMap = {
+    0: "Original cohort 30-day mortality was 0%.",
+    1: "Original cohort 30-day mortality was about 13%.",
+    2: "Original cohort 30-day mortality was about 26%.",
+    3: "Original cohort 30-day mortality was about 72%.",
+    4: "Original cohort 30-day mortality was about 97%.",
+    5: "Original cohort 30-day mortality approached 100%.",
+    6: "Original cohort 30-day mortality approached 100%.",
+  };
+
+  let interpretation = "";
+  if (points <= 1) interpretation = "lower early mortality risk category";
+  else if (points <= 2) interpretation = "intermediate early mortality risk category";
+  else interpretation = "high early mortality risk category";
+
+  return {
+    score: "ich_score",
+    value: points,
+    interpretation,
+    risk_estimate: mortalityMap[points],
+    clinical_note: "ICH Score supports early prognostic communication but should not be used alone for treatment limitation.",
+  };
+}
+
+function computeCapriniVte(i) {
+  let points = 0;
+
+  if (i.age >= 75) points += 3;
+  else if (i.age >= 61) points += 2;
+  else if (i.age >= 41) points += 1;
+
+  points += i.caprini_procedure_points;
+  points += i.caprini_additional_points;
+
+  points += i.caprini_bmi_gt_25 ? 1 : 0;
+  points += i.caprini_swollen_legs ? 1 : 0;
+  points += i.caprini_varicose_veins ? 1 : 0;
+  points += i.caprini_pregnancy_postpartum ? 1 : 0;
+  points += i.caprini_hormone_therapy_or_ocp ? 1 : 0;
+  points += i.caprini_sepsis_lt_1_month ? 1 : 0;
+  points += i.caprini_serious_lung_disease_lt_1_month ? 1 : 0;
+  points += i.caprini_acute_mi_lt_1_month ? 1 : 0;
+  points += i.caprini_chf_lt_1_month ? 1 : 0;
+  points += i.caprini_inflammatory_bowel_disease ? 1 : 0;
+  points += i.caprini_medical_bed_rest ? 1 : 0;
+
+  points += i.caprini_malignancy ? 2 : 0;
+  points += i.caprini_bed_bound_gt_72h ? 2 : 0;
+  points += i.caprini_immobilizing_cast ? 2 : 0;
+  points += i.caprini_central_venous_access ? 2 : 0;
+
+  points += i.caprini_prior_vte ? 3 : 0;
+  points += i.caprini_family_history_vte ? 3 : 0;
+  points += i.caprini_known_thrombophilia ? 3 : 0;
+
+  points += i.caprini_stroke_lt_1_month ? 5 : 0;
+  points += i.caprini_elective_lower_limb_arthroplasty ? 5 : 0;
+  points += i.caprini_hip_pelvis_leg_fracture_lt_1_month ? 5 : 0;
+  points += i.caprini_acute_spinal_cord_injury_lt_1_month ? 5 : 0;
+  points += i.caprini_multiple_trauma_lt_1_month ? 5 : 0;
+
+  let interpretation = "";
+  let riskEstimate = "";
+  if (points === 0) {
+    interpretation = "very low VTE risk";
+    riskEstimate = "Typical baseline symptomatic VTE risk is very low (roughly <0.5%) without additional risk factors.";
+  } else if (points <= 2) {
+    interpretation = "low VTE risk";
+    riskEstimate = "Low-risk Caprini range is often associated with roughly 1-2% VTE risk without prophylaxis.";
+  } else if (points <= 4) {
+    interpretation = "moderate VTE risk";
+    riskEstimate = "Moderate-risk range is often associated with around 3% VTE risk without prophylaxis.";
+  } else if (points <= 8) {
+    interpretation = "high VTE risk";
+    riskEstimate = "High-risk range is commonly associated with around 6% VTE risk without prophylaxis.";
+  } else {
+    interpretation = "highest VTE risk";
+    riskEstimate = "Very high Caprini scores are associated with markedly increased VTE risk; use aggressive guideline-based prophylaxis planning.";
+  }
+
+  return {
+    score: "caprini_vte",
+    value: points,
+    interpretation,
+    risk_estimate: riskEstimate,
+    clinical_note: "Use Caprini alongside local prophylaxis policy and bleeding-risk assessment to select mechanical/pharmacologic prophylaxis.",
+  };
+}
+
 const COMPUTERS = {
   wilson: computeWilson,
   stop_bang: computeStopBang,
@@ -1421,6 +1649,9 @@ const COMPUTERS = {
   gupta_mica: computeGuptaMica,
   nela_manual: computeNelaManual,
   acs_nsqip_manual: computeNsqipManual,
+  wfns_sah: computeWfnsSah,
+  ich_score: computeIchScore,
+  caprini_vte: computeCapriniVte,
 };
 
 export function computeScores(selectedScores, inputs) {
