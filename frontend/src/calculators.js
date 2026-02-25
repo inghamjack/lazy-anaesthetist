@@ -194,6 +194,114 @@ export const CASE_RISK_SCORE_BUNDLE = [
   "acs_nsqip_manual",
 ];
 
+export const REGIONAL_SUGGESTIONS = [
+  {
+    key: "shoulder",
+    label: "Shoulder",
+    primary: ["Interscalene block"],
+    alternatives: ["Supraclavicular block"],
+    caution: "Phrenic nerve palsy risk is relevant for interscalene techniques.",
+  },
+  {
+    key: "clavicle",
+    label: "Clavicle",
+    primary: ["Interscalene or superior trunk block + superficial cervical plexus"],
+    alternatives: ["Clavipectoral fascial plane block (adjunct)"],
+    caution: "Coverage can be mixed; surgical infiltration is often still required.",
+  },
+  {
+    key: "upper_arm_humerus",
+    label: "Upper Arm / Humerus",
+    primary: ["Supraclavicular block"],
+    alternatives: ["Infraclavicular block"],
+    caution: "Proximal humeral work may need supplemental shoulder-region coverage.",
+  },
+  {
+    key: "elbow_forearm",
+    label: "Elbow / Forearm",
+    primary: ["Supraclavicular block"],
+    alternatives: ["Infraclavicular block", "Axillary block"],
+    caution: "Tourniquet pain may need supplementation.",
+  },
+  {
+    key: "wrist_hand",
+    label: "Wrist / Hand",
+    primary: ["Axillary block", "Distal forearm nerve blocks"],
+    alternatives: ["Infraclavicular block"],
+    caution: "Selective distal blocks can preserve proximal motor function.",
+  },
+  {
+    key: "breast_axilla",
+    label: "Breast / Axilla",
+    primary: ["PECS II block", "Paravertebral block"],
+    alternatives: ["Erector spinae plane (ESP) block"],
+    caution: "Axillary procedures may require additional intercostobrachial coverage.",
+  },
+  {
+    key: "chest_wall",
+    label: "Chest Wall",
+    primary: ["Thoracic epidural", "Paravertebral block"],
+    alternatives: ["Serratus anterior plane block", "ESP block"],
+    caution: "Choose unilateral vs bilateral approach based on incision pattern.",
+  },
+  {
+    key: "thoracic_abdomen",
+    label: "Thoracic Abdomen",
+    primary: ["Thoracic epidural"],
+    alternatives: ["Subcostal TAP block", "Quadratus lumborum block", "ESP block"],
+    caution: "Extent of spread can be variable with fascial plane techniques.",
+  },
+  {
+    key: "lower_abdomen",
+    label: "Lower Abdomen",
+    primary: ["Spinal anaesthesia", "TAP block"],
+    alternatives: ["Ilioinguinal/iliohypogastric block", "Quadratus lumborum block"],
+    caution: "Visceral pain may not be fully covered by abdominal wall blocks alone.",
+  },
+  {
+    key: "inguinal_groin",
+    label: "Inguinal / Groin",
+    primary: ["Ilioinguinal/iliohypogastric block"],
+    alternatives: ["Transversalis fascia plane block", "Spinal anaesthesia"],
+    caution: "Variable genital branch involvement may require local infiltration.",
+  },
+  {
+    key: "hip",
+    label: "Hip",
+    primary: ["Spinal anaesthesia", "Fascia iliaca block (analgesic)"],
+    alternatives: ["PENG block (analgesic)", "Lumbar plexus block (selected cases)"],
+    caution: "Hip surgery often needs neuraxial or general anaesthesia plus analgesic blocks.",
+  },
+  {
+    key: "knee",
+    label: "Knee",
+    primary: ["Adductor canal block + IPACK"],
+    alternatives: ["Femoral nerve block", "Sciatic block for posterior work"],
+    caution: "Motor-sparing approaches are often preferred for early mobilisation.",
+  },
+  {
+    key: "lower_leg",
+    label: "Lower Leg",
+    primary: ["Popliteal sciatic + saphenous block"],
+    alternatives: ["Adductor canal + sciatic variants"],
+    caution: "Confirm saphenous territory coverage for medial incisions.",
+  },
+  {
+    key: "ankle_foot",
+    label: "Ankle / Foot",
+    primary: ["Ankle block", "Popliteal sciatic + saphenous block"],
+    alternatives: ["Selective distal nerve blocks"],
+    caution: "Ankle blocks are useful when proximal motor block is undesirable.",
+  },
+  {
+    key: "spine_surgery",
+    label: "Spine Surgery",
+    primary: ["ESP block (thoracic/lumbar levels)", "Wound infiltration catheters"],
+    alternatives: ["Paravertebral techniques in selected thoracic cases"],
+    caution: "Usually adjunct analgesia rather than sole anaesthetic technique.",
+  },
+];
+
 export const NUMERIC_INPUTS = {
   respiratory_rate: { label: "Respiratory rate", min: 0, max: 80, default: 18, step: 1, kind: "int" },
   oxygen_saturation: { label: "Oxygen saturation (%)", min: 0, max: 100, default: 98, step: 1, kind: "int" },
@@ -353,10 +461,19 @@ function roundTo(value, decimals = 1) {
   return Math.round(value * factor) / factor;
 }
 
-export function computeCaseBasics({ age, height_cm, weight_kg, sex_at_birth }) {
+export function computeCaseBasics({
+  age,
+  height_cm,
+  weight_kg,
+  sex_at_birth,
+  pregnant,
+  gestation_weeks,
+}) {
   const safeAge = Number.isFinite(age) ? age : 0;
   const safeHeightCm = Number.isFinite(height_cm) ? height_cm : 170;
   const safeWeightKg = Number.isFinite(weight_kg) ? weight_kg : 75;
+  const safeGestationWeeks = Number.isFinite(gestation_weeks) ? gestation_weeks : 0;
+  const isPregnant = Boolean(pregnant);
   const height_m = Math.max(safeHeightCm, 1) / 100;
   const bmi = safeWeightKg / (height_m ** 2);
 
@@ -378,12 +495,29 @@ export function computeCaseBasics({ age, height_cm, weight_kg, sex_at_birth }) {
     : 0.3561 * (height_m ** 3) + 0.03308 * safeWeightKg + 0.1833;
   const bloodVolumeMl = bloodVolumeLiters * 1000;
 
+  const bmiAdjustedMlPerKg = isMale
+    ? bmi >= 40 ? 55 : bmi >= 30 ? 60 : bmi >= 25 ? 65 : 70
+    : bmi >= 40 ? 50 : bmi >= 30 ? 55 : bmi >= 25 ? 60 : 65;
+  const bmiAdjustedBloodVolumeMl = bmiAdjustedMlPerKg * safeWeightKg;
+
+  let pregnancyMultiplier = 1.0;
+  if (isPregnant && !isMale) {
+    if (safeGestationWeeks >= 35) pregnancyMultiplier = 1.5;
+    else if (safeGestationWeeks >= 29) pregnancyMultiplier = 1.45;
+    else if (safeGestationWeeks >= 21) pregnancyMultiplier = 1.35;
+    else if (safeGestationWeeks >= 13) pregnancyMultiplier = 1.2;
+    else if (safeGestationWeeks >= 6) pregnancyMultiplier = 1.1;
+  }
+  const pregnancyAdjustedBloodVolumeMl = bloodVolumeMl * pregnancyMultiplier;
+
   return {
     demographics: {
       age: Number.parseInt(safeAge, 10),
       height_cm: roundTo(safeHeightCm, 1),
       weight_kg: roundTo(safeWeightKg, 1),
       sex_at_birth,
+      pregnant: isPregnant,
+      gestation_weeks: roundTo(safeGestationWeeks, 1),
     },
     bmi: roundTo(bmi, 1),
     ideal_body_weight_kg: roundTo(ibw, 1),
@@ -395,6 +529,12 @@ export function computeCaseBasics({ age, height_cm, weight_kg, sex_at_birth }) {
     },
     estimated_blood_volume_ml: roundTo(bloodVolumeMl, 0),
     estimated_blood_volume_l: roundTo(bloodVolumeLiters, 2),
+    bmi_adjusted_blood_volume_ml: roundTo(bmiAdjustedBloodVolumeMl, 0),
+    bmi_adjusted_blood_volume_l: roundTo(bmiAdjustedBloodVolumeMl / 1000, 2),
+    bmi_adjusted_ml_per_kg: roundTo(bmiAdjustedMlPerKg, 1),
+    pregnancy_adjusted_blood_volume_ml: roundTo(pregnancyAdjustedBloodVolumeMl, 0),
+    pregnancy_adjusted_blood_volume_l: roundTo(pregnancyAdjustedBloodVolumeMl / 1000, 2),
+    pregnancy_multiplier: roundTo(pregnancyMultiplier, 2),
   };
 }
 

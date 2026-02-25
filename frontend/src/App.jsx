@@ -6,6 +6,7 @@ import {
   CHOICE_INPUTS,
   MANUAL_CALCULATOR_LINKS,
   NUMERIC_INPUTS,
+  REGIONAL_SUGGESTIONS,
   SCORE_CATEGORY,
   SCORE_DEFINITIONS,
   SCORE_EVIDENCE,
@@ -27,6 +28,8 @@ function App() {
     sex_at_birth: "male",
     height_cm: 170,
     weight_kg: 75,
+    pregnant: false,
+    gestation_weeks: 20,
   });
   const [selectedMap, setSelectedMap] = useState(() => {
     const initial = {};
@@ -36,6 +39,8 @@ function App() {
   const [results, setResults] = useState([]);
   const [warnings, setWarnings] = useState([]);
   const [error, setError] = useState("");
+  const [regionalSearch, setRegionalSearch] = useState("");
+  const [selectedRegionalSite, setSelectedRegionalSite] = useState("");
 
   const scoreMap = useMemo(
     () => Object.fromEntries(SCORE_DEFINITIONS.map((item) => [item.key, item])),
@@ -99,6 +104,15 @@ function App() {
   );
 
   const selectedCount = selectedScores.length;
+  const filteredRegionalSites = useMemo(() => {
+    const query = regionalSearch.trim().toLowerCase();
+    if (!query) return REGIONAL_SUGGESTIONS;
+    return REGIONAL_SUGGESTIONS.filter((item) => item.label.toLowerCase().includes(query));
+  }, [regionalSearch]);
+  const regionalSuggestion = useMemo(
+    () => REGIONAL_SUGGESTIONS.find((item) => item.key === selectedRegionalSite),
+    [selectedRegionalSite]
+  );
 
   const onSelectAll = () => {
     const all = {};
@@ -137,12 +151,19 @@ function App() {
   };
 
   const onDemographicChange = (name, value) => {
-    setDemographics((prev) => ({
-      ...prev,
-      [name]: name === "sex_at_birth"
-        ? value
-        : (Number.isFinite(Number.parseFloat(value)) ? Number.parseFloat(value) : prev[name]),
-    }));
+    setDemographics((prev) => {
+      if (name === "sex_at_birth") {
+        return {
+          ...prev,
+          sex_at_birth: value,
+          pregnant: value === "female" ? prev.pregnant : false,
+        };
+      }
+      return {
+        ...prev,
+        [name]: Number.isFinite(Number.parseFloat(value)) ? Number.parseFloat(value) : prev[name],
+      };
+    });
     setResults([]);
     setWarnings([]);
     setError("");
@@ -279,6 +300,32 @@ function App() {
               onChange={(e) => onDemographicChange("weight_kg", e.target.value)}
             />
           </label>
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={demographics.pregnant}
+              onChange={(e) => {
+                setDemographics((prev) => ({ ...prev, pregnant: e.target.checked }));
+                setResults([]);
+                setWarnings([]);
+                setError("");
+              }}
+              disabled={demographics.sex_at_birth !== "female"}
+            />
+            <span>Pregnant</span>
+          </label>
+          <label>
+            Gestation (weeks)
+            <input
+              type="number"
+              min={0}
+              max={45}
+              step={1}
+              value={demographics.gestation_weeks}
+              onChange={(e) => onDemographicChange("gestation_weeks", e.target.value)}
+              disabled={!demographics.pregnant || demographics.sex_at_birth !== "female"}
+            />
+          </label>
         </div>
         <div className="metric-grid">
           <article className="metric-card">
@@ -295,10 +342,52 @@ function App() {
           </article>
           <article className="metric-card">
             <h3>Estimated Blood Volume</h3>
-            <p><strong>{caseBasics.estimated_blood_volume_ml} ml</strong> ({caseBasics.estimated_blood_volume_l} L)</p>
+            <p><strong>Nadler:</strong> {caseBasics.estimated_blood_volume_ml} ml ({caseBasics.estimated_blood_volume_l} L)</p>
+            <p><strong>BMI-adjusted:</strong> {caseBasics.bmi_adjusted_blood_volume_ml} ml ({caseBasics.bmi_adjusted_blood_volume_l} L)</p>
+            <p className="hint">BMI-adjusted rate: {caseBasics.bmi_adjusted_ml_per_kg} ml/kg.</p>
+            <p><strong>Pregnancy-adjusted:</strong> {caseBasics.pregnancy_adjusted_blood_volume_ml} ml ({caseBasics.pregnancy_adjusted_blood_volume_l} L)</p>
+            <p className="hint">
+              Multiplier: x{caseBasics.pregnancy_multiplier} {demographics.pregnant && demographics.sex_at_birth === "female"
+                ? `(gestation ${Math.round(demographics.gestation_weeks)} weeks)`
+                : "(not applied)"}.
+            </p>
             <p className="hint">Nadler formula (height + weight + sex-specific constants).</p>
           </article>
         </div>
+
+        <h2>Regional Anaesthesia Suggestions</h2>
+        <p className="hint">Simple site-based options only. No dosing or protocol logic.</p>
+        <div className="grid two">
+          <label>
+            Search surgery site
+            <input
+              type="text"
+              value={regionalSearch}
+              onChange={(e) => setRegionalSearch(e.target.value)}
+              placeholder="e.g. shoulder, chest, lower abdomen, spine"
+            />
+          </label>
+          <label>
+            Surgery site
+            <select
+              value={selectedRegionalSite}
+              onChange={(e) => setSelectedRegionalSite(e.target.value)}
+            >
+              <option value="">Select a site...</option>
+              {filteredRegionalSites.map((item) => (
+                <option key={item.key} value={item.key}>{item.label}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        {regionalSuggestion ? (
+          <article className="metric-card">
+            <h3>{regionalSuggestion.label}</h3>
+            <p><strong>Primary options:</strong> {regionalSuggestion.primary.join("; ")}.</p>
+            <p><strong>Alternatives:</strong> {regionalSuggestion.alternatives.join("; ")}.</p>
+            <p className="hint"><strong>Caution:</strong> {regionalSuggestion.caution}</p>
+          </article>
+        ) : null}
 
         <h2>1) Select Scores</h2>
         <p className="hint">Choose scores first. Required inputs are then shown automatically.</p>
