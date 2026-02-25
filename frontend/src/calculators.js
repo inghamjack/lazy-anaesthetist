@@ -511,6 +511,133 @@ export const ANTICOAG_DRUG_OPTIONS = [
   },
 ];
 
+export const DIABETES_GUIDANCE_LINKS = {
+  page: "https://cpoc.org.uk/guidelines-and-resources/guidelines/guideline-diabetes",
+  pdf: "https://www.cpoc.org.uk/sites/cpoc/files/documents/2024-03/CPOC-DiabetesGuideline2023.pdf",
+};
+
+export const DIABETES_SURGERY_TIMING_OPTIONS = [
+  { value: "am", label: "AM surgery list" },
+  { value: "pm", label: "PM surgery list" },
+];
+
+export const DIABETES_MEDICATION_RULES = [
+  {
+    key: "metformin",
+    label: "Metformin",
+    dayBefore: "Take as normal.",
+    dayOfAm: "If once or twice daily, take as normal. If three times daily, omit lunchtime dose.",
+    dayOfPm: "If once or twice daily, take as normal. If three times daily, omit lunchtime dose.",
+    extra:
+      "If contrast is planned and eGFR <60 mL/min/1.73m2, omit on procedure day and withhold for 48 h after.",
+  },
+  {
+    key: "sulphonylurea",
+    label: "Sulphonylurea (e.g. gliclazide)",
+    dayBefore: "Take as normal.",
+    dayOfAm: "Omit morning dose. If normally twice daily, evening dose can be given if eating.",
+    dayOfPm: "Do not take on day of surgery.",
+    extra: "Higher hypoglycaemia risk in fasting patients.",
+  },
+  {
+    key: "pioglitazone",
+    label: "Pioglitazone",
+    dayBefore: "Take as normal.",
+    dayOfAm: "Take as normal.",
+    dayOfPm: "Take as normal.",
+    extra: "",
+  },
+  {
+    key: "dpp4",
+    label: "DPP-4 inhibitor (e.g. sitagliptin)",
+    dayBefore: "Take as normal.",
+    dayOfAm: "Take as normal.",
+    dayOfPm: "Take as normal.",
+    extra: "",
+  },
+  {
+    key: "glp1",
+    label: "GLP-1 receptor agonist (daily/weekly)",
+    dayBefore: "Take as normal.",
+    dayOfAm: "Take as normal.",
+    dayOfPm: "Take as normal.",
+    extra:
+      "CPOC committee advice is to continue; consider aspiration precautions per local airway policy.",
+  },
+  {
+    key: "sglt2",
+    label: "SGLT2 inhibitor (e.g. dapagliflozin/empagliflozin)",
+    dayBefore: "Omit on day before surgery.",
+    dayOfAm: "Omit on day of surgery.",
+    dayOfPm: "Omit on day of surgery.",
+    extra: "Check ketones daily while omitted and restart when clinically stable and eating.",
+  },
+];
+
+export const LOCAL_ANAESTHETIC_GUIDANCE_LINKS = {
+  lidocaine: "https://www.medicines.org.uk/emc/product/15150/smpc",
+  bupivacaine: "https://www.medicines.org.uk/emc/product/11611/smpc",
+  levobupivacaine: "https://www.medicines.org.uk/emc/product/13642/smpc",
+  prilocaine: "https://www.medicines.org.uk/emc/product/870/smpc",
+  supporting_weight_table:
+    "https://rightdecisions.scot.nhs.uk/tam-treatments-and-medicines-nhs-highland/adult-therapeutic-guidelines/anaesthesia/local-anaesthesia/",
+};
+
+export const LOCAL_ANAESTHETIC_WEIGHT_MODES = [
+  { value: "actual", label: "Actual body weight" },
+  { value: "ibw", label: "Ideal body weight (IBW)" },
+  { value: "lbw", label: "Lean body weight (LBW)" },
+  { value: "custom", label: "Custom weight" },
+];
+
+export const LOCAL_ANAESTHETIC_LIMITS = [
+  {
+    key: "lidocaine_plain",
+    label: "Lidocaine (plain)",
+    mgPerKg: 4.5,
+    maxMg: 300,
+    commonConcentrationMgMl: 10,
+    concentrationLabel: "1% (10 mg/mL)",
+    note: "From SmPC: 4.5 mg/kg up to 300 mg without vasoconstrictor.",
+  },
+  {
+    key: "lidocaine_adrenaline",
+    label: "Lidocaine + adrenaline",
+    mgPerKg: 7,
+    maxMg: 500,
+    commonConcentrationMgMl: 10,
+    concentrationLabel: "1% (10 mg/mL)",
+    note: "From SmPC: 7 mg/kg up to 500 mg with vasoconstrictor.",
+  },
+  {
+    key: "bupivacaine",
+    label: "Bupivacaine",
+    mgPerKg: 2,
+    maxMg: 150,
+    commonConcentrationMgMl: 5,
+    concentrationLabel: "0.5% (5 mg/mL)",
+    note: "From SmPC: do not exceed 2 mg/kg in any 4-hour period; single dose usually up to 150 mg.",
+  },
+  {
+    key: "levobupivacaine",
+    label: "Levobupivacaine",
+    mgPerKg: 2,
+    maxMg: 150,
+    commonConcentrationMgMl: 5,
+    concentrationLabel: "0.5% (5 mg/mL)",
+    note: "Common UK practice uses about 2 mg/kg; SmPC also caps single dose at 150 mg.",
+  },
+  {
+    key: "prilocaine",
+    label: "Prilocaine",
+    mgPerKg: 5,
+    maxMg: 400,
+    commonConcentrationMgMl: 10,
+    concentrationLabel: "1% (10 mg/mL)",
+    note: "Adult SmPC cap is 400 mg. Weight-based 5 mg/kg is a conservative practical rule.",
+  },
+];
+
 export const NUMERIC_INPUTS = {
   respiratory_rate: { label: "Respiratory rate", min: 0, max: 80, default: 18, step: 1, kind: "int" },
   oxygen_saturation: { label: "Oxygen saturation (%)", min: 0, max: 100, default: 98, step: 1, kind: "int" },
@@ -859,6 +986,74 @@ export function computeAnticoagSafety({
     procedureMessage,
     chartNote,
   };
+}
+
+const DIABETES_RULE_MAP = Object.fromEntries(DIABETES_MEDICATION_RULES.map((item) => [item.key, item]));
+
+export function computeDiabetesMedicationAdvice({
+  medicationKey,
+  surgeryTiming,
+  contrastPlanned,
+  egfrMlMin,
+  eatingByEvening,
+}) {
+  const rule = DIABETES_RULE_MAP[medicationKey] ?? null;
+  if (!rule) {
+    return {
+      headline: "Select a diabetes medication class.",
+      action: "",
+      dayBefore: "",
+      notes: [],
+      chartNote: "",
+    };
+  }
+
+  const timing = surgeryTiming === "pm" ? "pm" : "am";
+  const action = timing === "pm" ? rule.dayOfPm : rule.dayOfAm;
+  const safeEgfr = Number.isFinite(egfrMlMin) ? egfrMlMin : null;
+  const notes = [];
+
+  if (rule.extra) notes.push(rule.extra);
+  if (rule.key === "metformin" && contrastPlanned && safeEgfr !== null && safeEgfr < 60) {
+    notes.push("Contrast + eGFR <60: withhold metformin on day of procedure and for 48 h afterwards.");
+  }
+  if (rule.key === "sulphonylurea" && timing === "am" && eatingByEvening) {
+    notes.push("If eating by evening, usual evening sulphonylurea dose can be resumed.");
+  }
+  if (rule.key === "sglt2") {
+    notes.push("Document perioperative ketosis surveillance while SGLT2 inhibitor is withheld.");
+  }
+
+  const chartNote = [
+    `Diabetes medication plan (${rule.label}).`,
+    `Day before: ${rule.dayBefore}`,
+    `Day of surgery (${timing.toUpperCase()} list): ${action}`,
+    ...notes,
+  ].join(" ");
+
+  return {
+    headline: `${rule.label} recommendation`,
+    action,
+    dayBefore: rule.dayBefore,
+    notes,
+    chartNote,
+  };
+}
+
+export function computeLocalAnaestheticMaximums(weightKg) {
+  const safeWeight = Number.isFinite(weightKg) ? Math.max(weightKg, 1) : 1;
+  return LOCAL_ANAESTHETIC_LIMITS.map((drug) => {
+    const weightBasedMg = safeWeight * drug.mgPerKg;
+    const maxRecommendedMg = Math.min(weightBasedMg, drug.maxMg);
+    const maxVolumeMl = maxRecommendedMg / drug.commonConcentrationMgMl;
+    return {
+      ...drug,
+      weightKg: roundTo(safeWeight, 1),
+      weightBasedMg: roundTo(weightBasedMg, 1),
+      maxRecommendedMg: roundTo(maxRecommendedMg, 1),
+      maxVolumeMlAtCommonConcentration: roundTo(maxVolumeMl, 1),
+    };
+  });
 }
 
 function computeWilson(i) {

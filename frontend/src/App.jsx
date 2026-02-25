@@ -7,6 +7,11 @@ import {
   CASE_RISK_SCORE_BUNDLE,
   CATEGORY_META,
   CHOICE_INPUTS,
+  DIABETES_GUIDANCE_LINKS,
+  DIABETES_MEDICATION_RULES,
+  DIABETES_SURGERY_TIMING_OPTIONS,
+  LOCAL_ANAESTHETIC_GUIDANCE_LINKS,
+  LOCAL_ANAESTHETIC_WEIGHT_MODES,
   MANUAL_CALCULATOR_LINKS,
   NUMERIC_INPUTS,
   REGIONAL_SUGGESTIONS,
@@ -17,6 +22,8 @@ import {
   buildInitialValues,
   computeAnticoagSafety,
   computeCaseBasics,
+  computeDiabetesMedicationAdvice,
+  computeLocalAnaestheticMaximums,
   computeScores,
   fieldLabel,
   summaryText,
@@ -53,6 +60,17 @@ function App() {
     apttNormal: false,
     catheterInSitu: false,
     traumaticPuncture: false,
+  });
+  const [diabetes, setDiabetes] = useState({
+    medicationKey: "metformin",
+    surgeryTiming: "am",
+    contrastPlanned: false,
+    egfrMlMin: 90,
+    eatingByEvening: true,
+  });
+  const [laDose, setLaDose] = useState({
+    weightMode: "actual",
+    customWeightKg: 70,
   });
 
   const scoreMap = useMemo(
@@ -139,6 +157,30 @@ function App() {
     [anticoag.entryId]
   );
   const anticoagAssessment = useMemo(() => computeAnticoagSafety(anticoag), [anticoag]);
+  const diabetesAssessment = useMemo(
+    () => computeDiabetesMedicationAdvice(diabetes),
+    [diabetes]
+  );
+  const localAnaestheticWeightKg = useMemo(() => {
+    if (laDose.weightMode === "ibw") return caseBasics.ideal_body_weight_kg;
+    if (laDose.weightMode === "lbw") return caseBasics.lean_body_weight_kg;
+    if (laDose.weightMode === "custom") {
+      return Number.isFinite(Number.parseFloat(laDose.customWeightKg))
+        ? Number.parseFloat(laDose.customWeightKg)
+        : demographics.weight_kg;
+    }
+    return demographics.weight_kg;
+  }, [
+    caseBasics.ideal_body_weight_kg,
+    caseBasics.lean_body_weight_kg,
+    demographics.weight_kg,
+    laDose.customWeightKg,
+    laDose.weightMode,
+  ]);
+  const localAnaestheticMaximums = useMemo(
+    () => computeLocalAnaestheticMaximums(localAnaestheticWeightKg),
+    [localAnaestheticWeightKg]
+  );
 
   const onSelectAll = () => {
     const all = {};
@@ -199,6 +241,30 @@ function App() {
     setAnticoag((prev) => {
       if (type === "checkbox") return { ...prev, [name]: Boolean(value) };
       if (type === "number") {
+        if (value === "") return { ...prev, [name]: "" };
+        const parsed = Number.parseFloat(value);
+        return { ...prev, [name]: Number.isFinite(parsed) ? parsed : prev[name] };
+      }
+      return { ...prev, [name]: value };
+    });
+  };
+
+  const onDiabetesChange = (name, value, type = "text") => {
+    setDiabetes((prev) => {
+      if (type === "checkbox") return { ...prev, [name]: Boolean(value) };
+      if (type === "number") {
+        if (value === "") return { ...prev, [name]: "" };
+        const parsed = Number.parseFloat(value);
+        return { ...prev, [name]: Number.isFinite(parsed) ? parsed : prev[name] };
+      }
+      return { ...prev, [name]: value };
+    });
+  };
+
+  const onLocalDoseChange = (name, value, type = "text") => {
+    setLaDose((prev) => {
+      if (type === "number") {
+        if (value === "") return { ...prev, [name]: "" };
         const parsed = Number.parseFloat(value);
         return { ...prev, [name]: Number.isFinite(parsed) ? parsed : prev[name] };
       }
@@ -527,6 +593,190 @@ function App() {
           <p className="hint">{anticoagAssessment.procedureMessage}</p>
           <p className="hint"><strong>Chart note draft:</strong> {anticoagAssessment.chartNote}</p>
         </article>
+
+        <h2>Peri-op Diabetes Medication Rules</h2>
+        <p className="hint">Quick non-insulin oral/injectable medication prompts for elective surgery pathways.</p>
+        <div className="actions two">
+          <a className="button-link" href={DIABETES_GUIDANCE_LINKS.page} target="_blank" rel="noreferrer">
+            Open CPOC diabetes page
+          </a>
+          <a className="button-link" href={DIABETES_GUIDANCE_LINKS.pdf} target="_blank" rel="noreferrer">
+            Open CPOC diabetes PDF
+          </a>
+        </div>
+        <div className="grid three">
+          <label>
+            Medication class
+            <select
+              value={diabetes.medicationKey}
+              onChange={(e) => onDiabetesChange("medicationKey", e.target.value)}
+            >
+              {DIABETES_MEDICATION_RULES.map((item) => (
+                <option key={item.key} value={item.key}>{item.label}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Surgery timing
+            <select
+              value={diabetes.surgeryTiming}
+              onChange={(e) => onDiabetesChange("surgeryTiming", e.target.value)}
+            >
+              {DIABETES_SURGERY_TIMING_OPTIONS.map((item) => (
+                <option key={item.value} value={item.value}>{item.label}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            eGFR (mL/min/1.73m2)
+            <input
+              type="number"
+              min={0}
+              max={180}
+              step={1}
+              value={diabetes.egfrMlMin}
+              onChange={(e) => onDiabetesChange("egfrMlMin", e.target.value, "number")}
+            />
+          </label>
+        </div>
+        <div className="grid three checks">
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={Boolean(diabetes.contrastPlanned)}
+              onChange={(e) => onDiabetesChange("contrastPlanned", e.target.checked, "checkbox")}
+            />
+            <span>IV contrast planned today</span>
+          </label>
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={Boolean(diabetes.eatingByEvening)}
+              onChange={(e) => onDiabetesChange("eatingByEvening", e.target.checked, "checkbox")}
+            />
+            <span>Expected to eat by evening</span>
+          </label>
+        </div>
+        <article className="metric-card">
+          <h3>{diabetesAssessment.headline}</h3>
+          <p><strong>Day before:</strong> {diabetesAssessment.dayBefore}</p>
+          <p><strong>Day of surgery:</strong> {diabetesAssessment.action}</p>
+          {diabetesAssessment.notes.length ? (
+            <ul>
+              {diabetesAssessment.notes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          ) : null}
+          <p className="hint"><strong>Chart note draft:</strong> {diabetesAssessment.chartNote}</p>
+        </article>
+        <div className="table-wrap">
+          <table className="simple-table">
+            <thead>
+              <tr>
+                <th>Medication</th>
+                <th>Day before</th>
+                <th>AM list</th>
+                <th>PM list</th>
+              </tr>
+            </thead>
+            <tbody>
+              {DIABETES_MEDICATION_RULES.map((item) => (
+                <tr key={item.key}>
+                  <td>{item.label}</td>
+                  <td>{item.dayBefore}</td>
+                  <td>{item.dayOfAm}</td>
+                  <td>{item.dayOfPm}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Local Anaesthetic Max Dose (Weight-based)</h2>
+        <p className="hint">
+          Uses common adult maxima. Always use the lower total dose in frailty, hepatic/cardiac disease, pregnancy, or mixed-agent plans.
+        </p>
+        <div className="actions two">
+          <a className="button-link" href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.lidocaine} target="_blank" rel="noreferrer">
+            Lidocaine SmPC
+          </a>
+          <a className="button-link" href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.prilocaine} target="_blank" rel="noreferrer">
+            Prilocaine SmPC
+          </a>
+        </div>
+        <details className="details small">
+          <summary>More local anaesthetic references</summary>
+          <ul>
+            <li><a href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.bupivacaine} target="_blank" rel="noreferrer">Bupivacaine SmPC</a></li>
+            <li><a href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.levobupivacaine} target="_blank" rel="noreferrer">Levobupivacaine SmPC</a></li>
+            <li><a href={LOCAL_ANAESTHETIC_GUIDANCE_LINKS.supporting_weight_table} target="_blank" rel="noreferrer">UK supporting weight-based table</a></li>
+          </ul>
+        </details>
+        <div className="grid three">
+          <label>
+            Dosing weight basis
+            <select
+              value={laDose.weightMode}
+              onChange={(e) => onLocalDoseChange("weightMode", e.target.value)}
+            >
+              {LOCAL_ANAESTHETIC_WEIGHT_MODES.map((item) => (
+                <option key={item.value} value={item.value}>{item.label}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Custom weight (kg)
+            <input
+              type="number"
+              min={1}
+              max={300}
+              step={0.1}
+              value={laDose.customWeightKg}
+              onChange={(e) => onLocalDoseChange("customWeightKg", e.target.value, "number")}
+              disabled={laDose.weightMode !== "custom"}
+            />
+          </label>
+          <label>
+            Active dosing weight (kg)
+            <input type="number" value={localAnaestheticWeightKg} readOnly />
+          </label>
+        </div>
+        <div className="table-wrap">
+          <table className="simple-table">
+            <thead>
+              <tr>
+                <th>Drug</th>
+                <th>mg/kg</th>
+                <th>Absolute cap (mg)</th>
+                <th>Calculated max (mg)</th>
+                <th>Approx max volume</th>
+              </tr>
+            </thead>
+            <tbody>
+              {localAnaestheticMaximums.map((drug) => (
+                <tr key={drug.key}>
+                  <td>{drug.label}</td>
+                  <td>{drug.mgPerKg}</td>
+                  <td>{drug.maxMg}</td>
+                  <td>{drug.maxRecommendedMg}</td>
+                  <td>{drug.maxVolumeMlAtCommonConcentration} mL @ {drug.concentrationLabel}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <details className="details small">
+          <summary>Dose assumptions used</summary>
+          <ul>
+            {localAnaestheticMaximums.map((drug) => (
+              <li key={drug.key}>{drug.label}: {drug.note}</li>
+            ))}
+          </ul>
+        </details>
+        <p className="hint">
+          Cumulative toxicity across local anaesthetic agents is additive. If mixing agents, keep the summed fractional maximum below 1.
+        </p>
 
         <h2>1) Select Scores</h2>
         <p className="hint">Choose scores first. Required inputs are then shown automatically.</p>
