@@ -227,6 +227,9 @@ function App() {
           pregnant: value === "female" ? prev.pregnant : false,
         };
       }
+      if (value === "") {
+        return { ...prev, [name]: "" };
+      }
       return {
         ...prev,
         [name]: Number.isFinite(Number.parseFloat(value)) ? Number.parseFloat(value) : prev[name],
